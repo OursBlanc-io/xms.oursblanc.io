@@ -12,7 +12,12 @@ class AuthenticateMcpToken
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $bearerToken = $request->bearerToken();
+        // Some MCP clients (e.g. Claude's "custom connector" UI) only accept
+        // a plain URL, with no way to set a custom Authorization header —
+        // falling back to a `token` query parameter lets those still work,
+        // at the cost of the token appearing in server access logs and
+        // browser history for that client.
+        $bearerToken = $request->bearerToken() ?? $request->query('token');
 
         if (! $bearerToken) {
             return response()->json(['error' => 'Missing bearer token.'], 401);

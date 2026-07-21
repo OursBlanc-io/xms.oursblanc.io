@@ -39,6 +39,19 @@ it('accepts a request with a valid bearer token', function () {
     expect($response->json('result.content.0.text'))->toContain('block_types');
 });
 
+it('accepts a token passed via the ?token= query parameter (no Authorization header)', function () {
+    ['plainTextToken' => $token] = ApiToken::generate('Claude', ['pages:read']);
+
+    $response = test()->postJson("/mcp/xms?token={$token}", [
+        'jsonrpc' => '2.0',
+        'id' => 1,
+        'method' => 'tools/call',
+        'params' => ['name' => 'list_block_types', 'arguments' => []],
+    ], ['Accept' => 'application/json, text/event-stream'])->assertOk();
+
+    expect($response->json('result.content.0.text'))->toContain('block_types');
+});
+
 it('marks the token as used on a successful call', function () {
     ['token' => $apiToken, 'plainTextToken' => $token] = ApiToken::generate('Claude', ['pages:read']);
 
