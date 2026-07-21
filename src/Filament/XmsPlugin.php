@@ -5,6 +5,8 @@ namespace OursBlanc\Xms\Filament;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 use OursBlanc\Xms\Filament\Resources\ApiTokenResource;
+use OursBlanc\Xms\Filament\Resources\CodeSnippetResource;
+use OursBlanc\Xms\Filament\Resources\MenuResource;
 use OursBlanc\Xms\Filament\Resources\PageResource;
 
 class XmsPlugin implements Plugin
@@ -23,6 +25,8 @@ class XmsPlugin implements Plugin
     {
         $panel->resources([
             PageResource::class,
+            MenuResource::class,
+            CodeSnippetResource::class,
             ApiTokenResource::class,
         ]);
     }
