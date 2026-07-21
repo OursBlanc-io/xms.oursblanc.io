@@ -13,6 +13,7 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 use OursBlanc\Xms\Blocks\BlockRegistry;
+use OursBlanc\Xms\Models\Page;
 
 class PageForm
 {
@@ -29,7 +30,7 @@ class PageForm
                             TextInput::make('slug')
                                 ->required()
                                 ->maxLength(500)
-                                ->regex('/^[a-z0-9]+(?:[-\/][a-z0-9]+)*$/')
+                                ->regex(Page::SLUG_REGEX)
                                 ->unique(
                                     table: 'xms_pages',
                                     column: 'slug',

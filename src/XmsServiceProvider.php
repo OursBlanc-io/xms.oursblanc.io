@@ -73,6 +73,7 @@ class XmsServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'xms');
         $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+        $this->loadRoutesFrom(__DIR__.'/../routes/mcp.php');
 
         if (config('xms.generic_blocks_enabled')) {
             $registry = $this->app->make(BlockRegistry::class);

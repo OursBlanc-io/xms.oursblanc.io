@@ -22,6 +22,12 @@ class Page extends Model implements HasMedia
     use SoftDeletes;
 
     /**
+     * Shared between the admin form and the MCP tools so slug validation
+     * stays consistent regardless of who is writing the page.
+     */
+    public const SLUG_REGEX = '/^[a-z0-9]+(?:[-\/][a-z0-9]+)*$/';
+
+    /**
      * Overridable resolver for who is performing the current write, used to
      * attribute page revisions. Defaults to the authenticated Filament user;
      * the MCP layer (Phase 6) swaps this for the acting API token.

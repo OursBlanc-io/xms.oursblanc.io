@@ -2,6 +2,7 @@
 
 namespace OursBlanc\Xms\Tests;
 
+use Laravel\Mcp\Server\McpServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 use OursBlanc\Xms\XmsServiceProvider;
 use Spatie\MediaLibrary\MediaLibraryServiceProvider;
@@ -12,6 +13,7 @@ class TestCase extends Orchestra
     {
         return [
             MediaLibraryServiceProvider::class,
+            McpServiceProvider::class,
             XmsServiceProvider::class,
         ];
     }
