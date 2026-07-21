@@ -5,6 +5,7 @@ namespace OursBlanc\Xms\Filament\Resources\PageResource\Pages;
 use Filament\Resources\Pages\CreateRecord;
 use OursBlanc\Xms\Blocks\BuilderStateTransformer;
 use OursBlanc\Xms\Filament\Resources\PageResource;
+use OursBlanc\Xms\Media\PageMediaSynchronizer;
 
 class CreatePage extends CreateRecord
 {
@@ -16,5 +17,10 @@ class CreatePage extends CreateRecord
         $data['seo'] ??= [];
 
         return $data;
+    }
+
+    protected function afterCreate(): void
+    {
+        app(PageMediaSynchronizer::class)->sync($this->record);
     }
 }

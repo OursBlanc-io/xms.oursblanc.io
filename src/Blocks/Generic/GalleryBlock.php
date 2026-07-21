@@ -6,6 +6,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use OursBlanc\Xms\Blocks\Block;
+use OursBlanc\Xms\Filament\Forms\Components\PageMediaUpload;
 
 class GalleryBlock extends Block
 {
@@ -29,8 +30,8 @@ class GalleryBlock extends Block
         return [
             Repeater::make('images')
                 ->schema([
-                    TextInput::make('image')
-                        ->numeric()
+                    PageMediaUpload::make('image')
+                        ->image()
                         ->required(),
                     TextInput::make('alt'),
                 ]),

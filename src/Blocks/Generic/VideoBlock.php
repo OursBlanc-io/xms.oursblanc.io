@@ -4,6 +4,7 @@ namespace OursBlanc\Xms\Blocks\Generic;
 
 use Filament\Forms\Components\TextInput;
 use OursBlanc\Xms\Blocks\Block;
+use OursBlanc\Xms\Filament\Forms\Components\PageMediaUpload;
 
 class VideoBlock extends Block
 {
@@ -25,18 +26,25 @@ class VideoBlock extends Block
     public static function fields(): array
     {
         return [
-            TextInput::make('video')
-                ->numeric(),
+            PageMediaUpload::make('video')
+                ->acceptedFileTypes(['video/mp4', 'video/webm', 'video/quicktime']),
             TextInput::make('url')
-                ->url(),
-            TextInput::make('poster')
-                ->numeric(),
+                ->url()
+                ->helperText('YouTube/Vimeo URL, used if no video is uploaded above.'),
+            PageMediaUpload::make('poster')
+                ->image()
+                ->helperText('Auto-generated from the video via ffmpeg if left empty.'),
         ];
     }
 
     public static function mediaFields(): array
     {
         return ['video', 'poster'];
+    }
+
+    public static function posterFieldMap(): array
+    {
+        return ['video' => 'poster'];
     }
 
     public static function view(): string

@@ -2,6 +2,7 @@
 
 namespace OursBlanc\Xms;
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
 use OursBlanc\Xms\Blocks\Block;
 use OursBlanc\Xms\Blocks\BlockRegistry;
@@ -14,6 +15,10 @@ use OursBlanc\Xms\Blocks\Generic\HeroBlock;
 use OursBlanc\Xms\Blocks\Generic\ImageBlock;
 use OursBlanc\Xms\Blocks\Generic\TextBlock;
 use OursBlanc\Xms\Blocks\Generic\VideoBlock;
+use OursBlanc\Xms\Console\PruneOrphanedMediaCommand;
+use OursBlanc\Xms\Media\FfmpegVideoProcessor;
+use OursBlanc\Xms\Media\PageMediaSynchronizer;
+use OursBlanc\Xms\Media\VideoProcessor;
 use OursBlanc\Xms\Rendering\PageRenderer;
 use OursBlanc\Xms\Rendering\ThemeManager;
 use OursBlanc\Xms\Rendering\ViewResolver;
@@ -43,6 +48,8 @@ class XmsServiceProvider extends ServiceProvider
         $this->app->singleton(ThemeManager::class);
         $this->app->singleton(ViewResolver::class);
         $this->app->singleton(PageRenderer::class);
+        $this->app->singleton(PageMediaSynchronizer::class);
+        $this->app->bind(VideoProcessor::class, FfmpegVideoProcessor::class);
     }
 
     public function boot(): void
@@ -74,6 +81,16 @@ class XmsServiceProvider extends ServiceProvider
                 __DIR__.'/../resources/css/xms.css' => public_path('vendor/xms/xms.css'),
                 __DIR__.'/../resources/js/xms.js' => public_path('vendor/xms/xms.js'),
             ], 'xms-assets');
+
+            $this->commands([
+                PruneOrphanedMediaCommand::class,
+            ]);
         }
+
+        $this->app->booted(function () {
+            $schedule = $this->app->make(Schedule::class);
+
+            $schedule->command(PruneOrphanedMediaCommand::class)->daily();
+        });
     }
 }

@@ -10,6 +10,7 @@ use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\URL;
 use OursBlanc\Xms\Blocks\BuilderStateTransformer;
 use OursBlanc\Xms\Filament\Resources\PageResource;
+use OursBlanc\Xms\Media\PageMediaSynchronizer;
 use OursBlanc\Xms\Models\Page;
 
 class EditPage extends EditRecord
@@ -40,6 +41,13 @@ class EditPage extends EditRecord
         $data['blocks'] = BuilderStateTransformer::toStoredState($data['blocks'] ?? []);
 
         return $data;
+    }
+
+    protected function afterSave(): void
+    {
+        app(PageMediaSynchronizer::class)->sync($this->record);
+
+        $this->fillForm();
     }
 
     protected function publishAction(): Action

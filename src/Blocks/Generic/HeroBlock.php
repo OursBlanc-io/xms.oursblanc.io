@@ -5,6 +5,7 @@ namespace OursBlanc\Xms\Blocks\Generic;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use OursBlanc\Xms\Blocks\Block;
+use OursBlanc\Xms\Filament\Forms\Components\PageMediaUpload;
 
 class HeroBlock extends Block
 {
@@ -29,8 +30,8 @@ class HeroBlock extends Block
             TextInput::make('title')
                 ->required(),
             TextInput::make('subtitle'),
-            TextInput::make('image')
-                ->numeric(),
+            PageMediaUpload::make('image')
+                ->image(),
             TextInput::make('cta_label'),
             TextInput::make('cta_url')
                 ->url(),

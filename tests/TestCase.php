@@ -4,12 +4,14 @@ namespace OursBlanc\Xms\Tests;
 
 use Orchestra\Testbench\TestCase as Orchestra;
 use OursBlanc\Xms\XmsServiceProvider;
+use Spatie\MediaLibrary\MediaLibraryServiceProvider;
 
 class TestCase extends Orchestra
 {
     protected function getPackageProviders($app): array
     {
         return [
+            MediaLibraryServiceProvider::class,
             XmsServiceProvider::class,
         ];
     }

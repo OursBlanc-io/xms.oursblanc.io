@@ -45,4 +45,16 @@ abstract class Block
     {
         return SchemaGenerator::rulesFromFields(static::fields(), static::mediaFields());
     }
+
+    /**
+     * Map of video media field name => poster media field name. When a video
+     * uploaded through the mapped field has no poster set, XMS attempts to
+     * generate one automatically (see Media\VideoProcessor).
+     *
+     * @return array<string, string>
+     */
+    public static function posterFieldMap(): array
+    {
+        return [];
+    }
 }

@@ -11,9 +11,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use OursBlanc\Xms\Events\PagePublished;
 use OursBlanc\Xms\Events\PageSaved;
 use OursBlanc\Xms\Events\PageUnpublished;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class Page extends Model
+class Page extends Model implements HasMedia
 {
+    use InteractsWithMedia;
     use SoftDeletes;
 
     /**
@@ -94,6 +98,26 @@ class Page extends Model
     public function scopeLocale(Builder $query, string $locale): Builder
     {
         return $query->where('locale', $locale);
+    }
+
+    /**
+     * Every media collection on a page is named `block-{uuid}`; conversions
+     * apply regardless of collection, but only to image files (videos are
+     * stored as-is, see Media\VideoProcessor for poster generation).
+     */
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        if ($media && ! str_starts_with((string) $media->mime_type, 'image/')) {
+            return;
+        }
+
+        foreach ([480, 960, 1920] as $width) {
+            $this->addMediaConversion("w{$width}")
+                ->width($width)
+                ->format('webp')
+                ->quality(82)
+                ->nonQueued();
+        }
     }
 
     protected function recordRevisionOfOriginalState(): void

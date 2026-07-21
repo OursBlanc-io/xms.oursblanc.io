@@ -1,4 +1,7 @@
 <div class="xms-block xms-block--hero" data-alignment="{{ $data['alignment'] ?? 'left' }}">
+    @if(!empty($data['image']))
+        <x-xms::picture :media-id="$data['image']" :alt="$data['title'] ?? ''" class="xms-block__background" />
+    @endif
     <div class="xms-block__content">
         <h1 class="xms-block__title">{{ $data['title'] ?? '' }}</h1>
         @if(!empty($data['subtitle']))

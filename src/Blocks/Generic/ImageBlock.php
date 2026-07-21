@@ -5,6 +5,7 @@ namespace OursBlanc\Xms\Blocks\Generic;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use OursBlanc\Xms\Blocks\Block;
+use OursBlanc\Xms\Filament\Forms\Components\PageMediaUpload;
 
 class ImageBlock extends Block
 {
@@ -26,8 +27,8 @@ class ImageBlock extends Block
     public static function fields(): array
     {
         return [
-            TextInput::make('image')
-                ->numeric()
+            PageMediaUpload::make('image')
+                ->image()
                 ->required(),
             TextInput::make('alt'),
             TextInput::make('caption'),

@@ -6,6 +6,7 @@ use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
 use OursBlanc\Xms\Blocks\Block;
+use OursBlanc\Xms\Filament\Forms\Components\PageMediaUpload;
 
 class ColumnsBlock extends Block
 {
@@ -31,8 +32,8 @@ class ColumnsBlock extends Block
                 ->schema([
                     TextInput::make('title'),
                     MarkdownEditor::make('content'),
-                    TextInput::make('image')
-                        ->numeric(),
+                    PageMediaUpload::make('image')
+                        ->image(),
                 ])
                 ->minItems(2)
                 ->maxItems(3)
