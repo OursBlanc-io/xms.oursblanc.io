@@ -14,6 +14,9 @@ use OursBlanc\Xms\Blocks\Generic\HeroBlock;
 use OursBlanc\Xms\Blocks\Generic\ImageBlock;
 use OursBlanc\Xms\Blocks\Generic\TextBlock;
 use OursBlanc\Xms\Blocks\Generic\VideoBlock;
+use OursBlanc\Xms\Rendering\PageRenderer;
+use OursBlanc\Xms\Rendering\ThemeManager;
+use OursBlanc\Xms\Rendering\ViewResolver;
 
 class XmsServiceProvider extends ServiceProvider
 {
@@ -37,6 +40,9 @@ class XmsServiceProvider extends ServiceProvider
 
         $this->app->singleton(BlockRegistry::class);
         $this->app->singleton(BlockValidator::class);
+        $this->app->singleton(ThemeManager::class);
+        $this->app->singleton(ViewResolver::class);
+        $this->app->singleton(PageRenderer::class);
     }
 
     public function boot(): void
@@ -53,10 +59,21 @@ class XmsServiceProvider extends ServiceProvider
             }
         }
 
+        $theme = $this->app->make(ThemeManager::class);
+
+        if ($themeViewsPath = $theme->viewsPath()) {
+            $this->loadViewsFrom($themeViewsPath, ThemeManager::VIEW_NAMESPACE);
+        }
+
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__.'/../config/xms.php' => config_path('xms.php'),
             ], 'xms-config');
+
+            $this->publishes([
+                __DIR__.'/../resources/css/xms.css' => public_path('vendor/xms/xms.css'),
+                __DIR__.'/../resources/js/xms.js' => public_path('vendor/xms/xms.js'),
+            ], 'xms-assets');
         }
     }
 }

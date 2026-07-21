@@ -1,0 +1,45 @@
+/*
+ * Neutral, unopinionated styles for the XMS generic blocks.
+ * Themes override visual design via CSS on the stable `.xms-block--*` classes
+ * exposed by each block view; this stylesheet only provides sane structural
+ * defaults so a page is usable before any theme is applied.
+ */
+
+.xms-block {
+    box-sizing: border-box;
+}
+
+.xms-block--hero {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 1.5rem;
+}
+
+.xms-block--hero[data-alignment="left"] {
+    justify-content: flex-start;
+    text-align: left;
+}
+
+.xms-block--hero[data-alignment="right"] {
+    justify-content: flex-end;
+    text-align: right;
+}
+
+.xms-block--gallery {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(var(--xms-gallery-columns, 3), minmax(0, 1fr));
+}
+
+.xms-block--columns {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.xms-block--cta {
+    padding: 2rem 1.5rem;
+    text-align: center;
+}

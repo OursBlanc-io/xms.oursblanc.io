@@ -7,6 +7,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\URL;
 use OursBlanc\Xms\Blocks\BuilderStateTransformer;
 use OursBlanc\Xms\Filament\Resources\PageResource;
 use OursBlanc\Xms\Models\Page;
@@ -22,6 +23,7 @@ class EditPage extends EditRecord
             $this->unpublishAction(),
             $this->duplicateAction(),
             $this->historyAction(),
+            $this->previewAction(),
             DeleteAction::make(),
         ];
     }
@@ -104,6 +106,20 @@ class EditPage extends EditRecord
 
                 $this->redirect(static::getResource()::getUrl('edit', ['record' => $duplicate]));
             });
+    }
+
+    protected function previewAction(): Action
+    {
+        return Action::make('preview')
+            ->label('Preview')
+            ->icon('heroicon-o-eye')
+            ->color('gray')
+            ->url(fn () => URL::temporarySignedRoute(
+                'xms.preview',
+                now()->addMinutes(30),
+                ['page' => $this->record->id],
+            ))
+            ->openUrlInNewTab();
     }
 
     protected function historyAction(): Action
