@@ -39,11 +39,14 @@ class FfmpegVideoProcessor implements VideoProcessor
             return null;
         }
 
+        // toMediaCollection()'s $diskName must be explicit: omitted, it falls
+        // back to spatie's own media-library.disk_name default, not ours.
+        // Store the poster on the same disk as the video itself.
         $poster = $video->model
             ->addMedia($posterPath)
             ->usingFileName(pathinfo((string) $video->file_name, PATHINFO_FILENAME).'-poster.jpg')
             ->withCustomProperties(['is_poster_for' => $video->id])
-            ->toMediaCollection($video->collection_name);
+            ->toMediaCollection($video->collection_name, $video->disk);
 
         @unlink($posterPath);
 

@@ -70,6 +70,11 @@ class XmsServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Defense in depth: every explicit toMediaCollection() call in this
+        // package passes xms.media_disk directly, but this keeps spatie's
+        // own default aligned too, in case a future call forgets to.
+        config(['media-library.disk_name' => config('xms.media_disk')]);
+
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'xms');
         $this->loadRoutesFrom(__DIR__.'/../routes/web.php');

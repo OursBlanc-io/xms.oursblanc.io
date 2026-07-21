@@ -54,6 +54,23 @@ it('attaches a pending upload into the media library and replaces the path with 
         ->and($media->model_id)->toBe($page->id);
 });
 
+it('stores the media on xms.media_disk even when it differs from the media-library default disk', function () {
+    Storage::fake('xms_other_disk');
+    config(['xms.media_disk' => 'xms_other_disk', 'filesystems.disks.xms_other_disk' => ['driver' => 'local', 'root' => '']]);
+
+    Storage::disk('xms_other_disk')->put('xms-pending/test.png', file_get_contents(__DIR__.'/../Fixtures/test-image.png'));
+
+    $page = heroPage([
+        ['uuid' => 'u1', 'type' => 'hero', 'data' => ['title' => 'T', 'alignment' => 'left', 'image' => 'xms-pending/test.png']],
+    ]);
+
+    app(PageMediaSynchronizer::class)->sync($page);
+
+    $imageValue = $page->fresh()->blocks[0]['data']['image'];
+
+    expect(Media::find($imageValue)->disk)->toBe('xms_other_disk');
+});
+
 it('leaves an already-attached media id untouched', function () {
     $page = heroPage([
         ['uuid' => 'u1', 'type' => 'hero', 'data' => ['title' => 'T', 'alignment' => 'left', 'image' => 42]],

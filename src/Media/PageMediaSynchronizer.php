@@ -89,8 +89,12 @@ class PageMediaSynchronizer
             return false;
         }
 
+        // addMediaFromDisk()'s $disk arg is only where the pending upload is
+        // read FROM; toMediaCollection()'s own $diskName arg is what decides
+        // where it's actually stored, defaulting to spatie's own
+        // media-library.disk_name (not ours) if omitted.
         $media = $page->addMediaFromDisk($value, $disk)
-            ->toMediaCollection("block-{$blockUuid}");
+            ->toMediaCollection("block-{$blockUuid}", $disk);
 
         $fields[$key] = $media->id;
 

@@ -106,9 +106,11 @@ class AttachMediaFromUrlTool extends AbstractXmsTool
 
         $fileName = basename((string) parse_url($data['url'], PHP_URL_PATH)) ?: 'file';
 
+        // toMediaCollection()'s $diskName must be explicit: omitted, it falls
+        // back to spatie's own media-library.disk_name default, not ours.
         $media = $page->addMedia($tempPath)
             ->usingFileName($fileName)
-            ->toMediaCollection("block-{$block['uuid']}");
+            ->toMediaCollection("block-{$block['uuid']}", config('xms.media_disk'));
 
         @unlink($tempPath);
 
