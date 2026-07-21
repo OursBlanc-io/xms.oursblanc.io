@@ -50,10 +50,7 @@ class CreatePageTool extends AbstractXmsTool
             'locale' => 'required|string|max:10',
             'title' => 'required|string|max:255',
             'slug' => [
-                'required',
-                'string',
-                'max:500',
-                'regex:'.Page::SLUG_REGEX,
+                ...$this->slugRules(),
                 Rule::unique('xms_pages', 'slug')->where('locale', $request->get('locale')),
             ],
             'blocks' => 'required|array',

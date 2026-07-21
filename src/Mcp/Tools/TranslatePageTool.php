@@ -47,7 +47,7 @@ class TranslatePageTool extends AbstractXmsTool
             'id' => 'required|integer',
             'target_locale' => 'required|string|max:10',
             'title' => 'required|string|max:255',
-            'slug' => ['required', 'string', 'max:500', 'regex:'.Page::SLUG_REGEX],
+            'slug' => $this->slugRules(),
             'blocks_translated' => 'required|array',
             'blocks_translated.*.type' => 'required|string',
             'seo_translated' => 'array',

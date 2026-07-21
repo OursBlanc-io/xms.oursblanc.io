@@ -107,6 +107,17 @@ it('create_page creates a draft page with generated uuids and returns preview/pu
         ->etc());
 });
 
+it('create_page allows an empty slug (the locale homepage)', function () {
+    $this->actingAsApiToken();
+
+    XmsMcpServer::tool(CreatePageTool::class, [
+        'locale' => 'fr', 'title' => 'Accueil', 'slug' => '',
+        'blocks' => [['type' => 'text', 'data' => ['content' => 'Bienvenue']]],
+    ])->assertOk();
+
+    expect(Page::sole()->slug)->toBe('');
+});
+
 it('create_page rejects a slug already used in the same locale', function () {
     $this->actingAsApiToken();
 

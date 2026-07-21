@@ -55,7 +55,7 @@ class UpdatePageTool extends AbstractXmsTool
 
         if ($request->get('slug') !== null) {
             $rules['slug'] = [
-                'string', 'max:500', 'regex:'.Page::SLUG_REGEX,
+                ...$this->slugRules(),
                 Rule::unique('xms_pages', 'slug')->where('locale', $page->locale)->ignore($page->id),
             ];
         }
