@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use OursBlanc\Xms\Http\Controllers\PreviewController;
 use OursBlanc\Xms\Http\Controllers\RenderController;
 use OursBlanc\Xms\Http\Controllers\SitemapController;
+use OursBlanc\Xms\Http\Middleware\SetCacheHeaders;
 
 Route::middleware('web')->group(function () {
     Route::get('/sitemap.xml', SitemapController::class)->name('xms.sitemap');
@@ -21,6 +22,7 @@ Route::middleware('web')->group(function () {
 
         if ($prefixedLocales !== []) {
             Route::get('/{locale}/{slug?}', RenderController::class)
+                ->middleware(SetCacheHeaders::class)
                 ->where('locale', implode('|', array_map('preg_quote', $prefixedLocales)))
                 ->where('slug', '.*')
                 ->name('xms.render.locale');
@@ -28,12 +30,14 @@ Route::middleware('web')->group(function () {
 
         if ($hideDefaultLocale) {
             Route::get('/{slug?}', RenderController::class)
+                ->middleware(SetCacheHeaders::class)
                 ->where('slug', '.*')
                 ->defaults('locale', $defaultLocale)
                 ->name('xms.render');
         }
     } else {
         Route::get('/{slug?}', RenderController::class)
+            ->middleware(SetCacheHeaders::class)
             ->where('slug', '.*')
             ->defaults('locale', $defaultLocale)
             ->name('xms.render');

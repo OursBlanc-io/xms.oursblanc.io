@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use OursBlanc\Xms\Events\PagePublished;
 use OursBlanc\Xms\Events\PageSaved;
 use OursBlanc\Xms\Events\PageUnpublished;
+use OursBlanc\Xms\Support\PageUrlGenerator;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -118,6 +119,35 @@ class Page extends Model implements HasMedia
                 ->quality(82)
                 ->nonQueued();
         }
+    }
+
+    /**
+     * URLs whose CDN cache should be purged whenever this page is saved,
+     * published, or unpublished: the page itself, its published sibling
+     * locales (their hreflang tags reference this one), and the sitemap.
+     * Host apps can append their own (listing pages, the homepage, ...) via
+     * the `xms.purge_urls` event.
+     *
+     * @return array<int, string>
+     */
+    public function urlsToPurge(): array
+    {
+        $urls = [PageUrlGenerator::for($this)];
+
+        if ($this->translation_group_id) {
+            foreach ($this->siblingLocales()->published()->get() as $sibling) {
+                $urls[] = PageUrlGenerator::for($sibling);
+            }
+        }
+
+        $urls[] = url('/sitemap.xml');
+
+        $extra = collect(event('xms.purge_urls', [$this]))
+            ->flatten()
+            ->filter()
+            ->all();
+
+        return array_values(array_unique(array_merge($urls, $extra)));
     }
 
     protected function recordRevisionOfOriginalState(): void

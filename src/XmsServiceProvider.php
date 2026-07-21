@@ -3,6 +3,7 @@
 namespace OursBlanc\Xms;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use OursBlanc\Xms\Blocks\Block;
 use OursBlanc\Xms\Blocks\BlockRegistry;
@@ -15,7 +16,14 @@ use OursBlanc\Xms\Blocks\Generic\HeroBlock;
 use OursBlanc\Xms\Blocks\Generic\ImageBlock;
 use OursBlanc\Xms\Blocks\Generic\TextBlock;
 use OursBlanc\Xms\Blocks\Generic\VideoBlock;
+use OursBlanc\Xms\Cache\CacheInvalidator;
+use OursBlanc\Xms\Cache\CloudflareInvalidator;
+use OursBlanc\Xms\Cache\NullInvalidator;
 use OursBlanc\Xms\Console\PruneOrphanedMediaCommand;
+use OursBlanc\Xms\Events\PagePublished;
+use OursBlanc\Xms\Events\PageSaved;
+use OursBlanc\Xms\Events\PageUnpublished;
+use OursBlanc\Xms\Listeners\DispatchCdnPurge;
 use OursBlanc\Xms\Media\FfmpegVideoProcessor;
 use OursBlanc\Xms\Media\PageMediaSynchronizer;
 use OursBlanc\Xms\Media\VideoProcessor;
@@ -50,6 +58,14 @@ class XmsServiceProvider extends ServiceProvider
         $this->app->singleton(PageRenderer::class);
         $this->app->singleton(PageMediaSynchronizer::class);
         $this->app->bind(VideoProcessor::class, FfmpegVideoProcessor::class);
+
+        $this->app->bind(CacheInvalidator::class, function () {
+            if (config('xms.cloudflare.zone_id') && config('xms.cloudflare.token')) {
+                return new CloudflareInvalidator;
+            }
+
+            return new NullInvalidator;
+        });
     }
 
     public function boot(): void
@@ -92,5 +108,7 @@ class XmsServiceProvider extends ServiceProvider
 
             $schedule->command(PruneOrphanedMediaCommand::class)->daily();
         });
+
+        Event::listen([PageSaved::class, PagePublished::class, PageUnpublished::class], DispatchCdnPurge::class);
     }
 }
