@@ -2,11 +2,13 @@
 
 namespace OursBlanc\Xms\Blocks\Generic;
 
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use OursBlanc\Xms\Blocks\Block;
 use OursBlanc\Xms\Filament\Forms\Components\PageMediaUpload;
+use OursBlanc\Xms\Filament\Forms\Components\PexelsPicker;
 
 class GalleryBlock extends Block
 {
@@ -32,8 +34,11 @@ class GalleryBlock extends Block
                 ->schema([
                     PageMediaUpload::make('image')
                         ->image()
-                        ->required(),
+                        ->required()
+                        ->hintAction(PexelsPicker::image('image', 'alt', 'attribution', 'attribution_url')),
                     TextInput::make('alt'),
+                    Hidden::make('attribution'),
+                    Hidden::make('attribution_url'),
                 ]),
             Select::make('columns')
                 ->options([

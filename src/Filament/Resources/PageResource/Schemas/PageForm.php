@@ -5,6 +5,7 @@ namespace OursBlanc\Xms\Filament\Resources\PageResource\Schemas;
 use Filament\Forms\Components\Builder;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -13,6 +14,7 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 use OursBlanc\Xms\Blocks\BlockRegistry;
+use OursBlanc\Xms\Filament\Forms\Components\PageMediaUpload;
 use OursBlanc\Xms\Models\Page;
 
 class PageForm
@@ -28,9 +30,15 @@ class PageForm
                                 ->required()
                                 ->maxLength(255),
                             TextInput::make('slug')
-                                ->required()
                                 ->maxLength(500)
-                                ->regex(Page::SLUG_REGEX)
+                                ->helperText('Leave empty for the homepage.')
+                                ->rule(function () {
+                                    return function (string $attribute, mixed $value, \Closure $fail) {
+                                        if ($value !== '' && preg_match(Page::SLUG_REGEX, (string) $value) !== 1) {
+                                            $fail('The slug format is invalid.');
+                                        }
+                                    };
+                                })
                                 ->unique(
                                     table: 'xms_pages',
                                     column: 'slug',
@@ -83,6 +91,28 @@ class PageForm
                                 ->default('draft')
                                 ->required(),
                             DateTimePicker::make('published_at'),
+                            Select::make('categories')
+                                ->relationship('categories', 'name')
+                                ->multiple()
+                                ->preload()
+                                ->searchable(),
+                        ]),
+                    Tab::make('Listing')
+                        ->schema([
+                            TextInput::make('list_title')
+                                ->maxLength(255)
+                                ->helperText('Shown instead of the title above when this page appears as a card in a page_list block. Leave empty to reuse the title.'),
+                            Textarea::make('list_excerpt')
+                                ->rows(3)
+                                ->helperText('Short summary shown in listing cards.'),
+                            PageMediaUpload::make('illustration')
+                                ->image()
+                                ->helperText('Cover image used in listing cards — separate from any image used in the page\'s own blocks.'),
+                            KeyValue::make('meta')
+                                ->label('Metadata')
+                                ->keyLabel('Key')
+                                ->valueLabel('Value')
+                                ->helperText('Freeform key/value pairs (e.g. format: video, visual_type: portrait) that a page_list block can filter on.'),
                         ]),
                 ])
                 ->columnSpanFull(),

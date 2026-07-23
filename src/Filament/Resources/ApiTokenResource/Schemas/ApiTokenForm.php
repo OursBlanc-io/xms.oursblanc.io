@@ -19,6 +19,10 @@ class ApiTokenForm
                     'pages:read' => 'Read pages',
                     'pages:write' => 'Write pages',
                     'pages:publish' => 'Publish pages',
+                    'menus:read' => 'Read menus',
+                    'menus:write' => 'Write menus',
+                    'forms:read' => 'Read forms',
+                    'forms:write' => 'Write forms',
                 ])
                 ->required(),
         ]);

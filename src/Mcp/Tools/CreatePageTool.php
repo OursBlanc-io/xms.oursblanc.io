@@ -39,6 +39,11 @@ class CreatePageTool extends AbstractXmsTool
             )->required(),
             'seo' => $schema->object([])->description('title, description, canonical, og_title, og_description, robots, structured_data.'),
             'translation_group_id' => $schema->integer()->description('Attach to an existing translation group instead of creating a new one.'),
+            'category_ids' => $schema->array()->items($schema->integer())
+                ->description('IDs of categories to attach, from list_categories.'),
+            'list_title' => $schema->string()->description('Shown instead of `title` when this page appears as a card in a page_list block. Defaults to `title`.'),
+            'list_excerpt' => $schema->string()->description('Short summary shown in listing cards.'),
+            'meta' => $schema->object([])->description('Freeform key/value metadata (e.g. {"format": "video", "visual_type": "portrait"}) that a page_list block can filter on.'),
         ];
     }
 
@@ -57,6 +62,12 @@ class CreatePageTool extends AbstractXmsTool
             'blocks.*.type' => 'required|string',
             'seo' => 'array',
             'translation_group_id' => 'nullable|integer',
+            'category_ids' => 'array',
+            'category_ids.*' => 'integer|exists:xms_categories,id',
+            'list_title' => 'nullable|string|max:255',
+            'list_excerpt' => 'nullable|string',
+            'meta' => 'array',
+            'meta.*' => 'string',
         ]);
 
         // Laravel's validate() only returns keys it has explicit rules for, which
@@ -78,8 +89,15 @@ class CreatePageTool extends AbstractXmsTool
             'title' => $data['title'],
             'blocks' => $blocks,
             'seo' => $data['seo'] ?? [],
+            'list_title' => $data['list_title'] ?? null,
+            'list_excerpt' => $data['list_excerpt'] ?? null,
+            'meta' => $data['meta'] ?? [],
             'status' => 'draft',
         ]);
+
+        if (! empty($data['category_ids'])) {
+            $page->categories()->sync($data['category_ids']);
+        }
 
         return Response::structured([
             'id' => $page->id,

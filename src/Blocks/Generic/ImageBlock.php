@@ -2,10 +2,12 @@
 
 namespace OursBlanc\Xms\Blocks\Generic;
 
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use OursBlanc\Xms\Blocks\Block;
 use OursBlanc\Xms\Filament\Forms\Components\PageMediaUpload;
+use OursBlanc\Xms\Filament\Forms\Components\PexelsPicker;
 
 class ImageBlock extends Block
 {
@@ -29,7 +31,8 @@ class ImageBlock extends Block
         return [
             PageMediaUpload::make('image')
                 ->image()
-                ->required(),
+                ->required()
+                ->hintAction(PexelsPicker::image('image', 'alt', 'attribution', 'attribution_url')),
             TextInput::make('alt'),
             TextInput::make('caption'),
             Select::make('width')
@@ -40,6 +43,8 @@ class ImageBlock extends Block
                 ])
                 ->default('content')
                 ->required(),
+            Hidden::make('attribution'),
+            Hidden::make('attribution_url'),
         ];
     }
 

@@ -3,6 +3,7 @@
 namespace OursBlanc\Xms\Blocks;
 
 use Filament\Forms\Components\Component;
+use OursBlanc\Xms\Models\Page;
 
 abstract class Block
 {
@@ -44,6 +45,19 @@ abstract class Block
     public static function rules(): array
     {
         return SchemaGenerator::rulesFromFields(static::fields(), static::mediaFields());
+    }
+
+    /**
+     * Runs just before rendering, letting a block compute derived data (e.g.
+     * querying the database) instead of relying solely on its stored `data`.
+     * Most blocks are purely presentational and never need to override this.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    public static function resolveData(array $data, Page $page): array
+    {
+        return $data;
     }
 
     /**

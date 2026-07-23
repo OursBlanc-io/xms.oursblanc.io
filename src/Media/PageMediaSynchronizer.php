@@ -83,6 +83,21 @@ class PageMediaSynchronizer
             return false;
         }
 
+        // A field already synced to a Media id round-trips through the
+        // browser/Livewire as a numeric *string* (e.g. after PageMediaUpload
+        // re-displays it, per its own docblock), not the PHP int this method
+        // originally wrote back — plain `is_string()` can no longer tell
+        // "still pending" apart from "already attached". Without this check,
+        // Storage::exists() on that id resolves true anyway (spatie stores
+        // each media's file under a directory named after its own id, e.g.
+        // "5/file.mp4", which Flysystem reports as an existing path), so this
+        // would try to re-attach that directory as if it were the file
+        // itself and crash retrieving its size. A pending upload path is
+        // never purely numeric ("xms-pending/{uuid}.{ext}"), so this is safe.
+        if (ctype_digit($value)) {
+            return false;
+        }
+
         $disk = config('xms.media_disk');
 
         if (! Storage::disk($disk)->exists($value)) {
@@ -99,6 +114,31 @@ class PageMediaSynchronizer
         $fields[$key] = $media->id;
 
         $this->maybeGeneratePoster($media, $fields, $key, $blockClass);
+
+        return true;
+    }
+
+    /**
+     * Same pending-path handoff as attachIfPending(), but for the page-level
+     * illustration (a fixed, single-file collection — not block-scoped, so
+     * it isn't reachable via `sync()`/mediaFields()). Call once the page has
+     * a persisted id, passing the raw dehydrated value of the form's
+     * `illustration` field (stripped out of $data before Page::create()/
+     * update(), since it isn't a real column).
+     */
+    public function syncIllustration(Page $page, mixed $value): bool
+    {
+        if (! is_string($value) || $value === '' || ctype_digit($value)) {
+            return false;
+        }
+
+        $disk = config('xms.media_disk');
+
+        if (! Storage::disk($disk)->exists($value)) {
+            return false;
+        }
+
+        $page->addMediaFromDisk($value, $disk)->toMediaCollection(Page::ILLUSTRATION_COLLECTION, $disk);
 
         return true;
     }

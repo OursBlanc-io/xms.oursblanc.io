@@ -23,7 +23,7 @@ it('list_block_types returns every generic block with its schema', function () {
 
     XmsMcpServer::tool(ListBlockTypesTool::class)
         ->assertOk()
-        ->assertStructuredContent(fn ($json) => $json->has('block_types', 8)->etc());
+        ->assertStructuredContent(fn ($json) => $json->has('block_types', 18)->etc());
 });
 
 it('list_pages filters by locale, status, and search', function () {

@@ -7,6 +7,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\Entry;
 use Filament\Schemas\Components\Component;
 
 class SchemaGenerator
@@ -175,6 +176,13 @@ class SchemaGenerator
 
     protected static function nameOf(mixed $field): ?string
     {
+        // Entry components (e.g. a Placeholder used for an admin-only preview)
+        // are display-only: they're never dehydrated into real form/block
+        // data, so they must not leak into the schema advertised to the AI.
+        if ($field instanceof Entry) {
+            return null;
+        }
+
         if (! $field instanceof Component || ! method_exists($field, 'getName')) {
             return null;
         }

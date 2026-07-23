@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OursBlanc\Xms\Events\PagePublished;
@@ -36,13 +37,23 @@ class Page extends Model implements HasMedia
 
     protected $table = 'xms_pages';
 
+    /**
+     * Media collection name for the page-level illustration set via the
+     * Settings tab — distinct from block media, which lives under
+     * `block-{uuid}` collections instead (see PageMediaSynchronizer).
+     */
+    public const ILLUSTRATION_COLLECTION = 'page-illustration';
+
     protected $fillable = [
         'translation_group_id',
         'locale',
         'slug',
         'title',
+        'list_title',
+        'list_excerpt',
         'blocks',
         'seo',
+        'meta',
         'template',
         'status',
         'published_at',
@@ -53,6 +64,7 @@ class Page extends Model implements HasMedia
     protected $casts = [
         'blocks' => 'array',
         'seo' => 'array',
+        'meta' => 'array',
         'published_at' => 'datetime',
     ];
 
@@ -97,6 +109,11 @@ class Page extends Model implements HasMedia
             ->where('id', '!=', $this->id);
     }
 
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(Category::class, 'xms_page_category');
+    }
+
     public function scopePublished(Builder $query): Builder
     {
         return $query->where('status', 'published');
@@ -105,6 +122,47 @@ class Page extends Model implements HasMedia
     public function scopeLocale(Builder $query, string $locale): Builder
     {
         return $query->where('locale', $locale);
+    }
+
+    public function scopeInCategory(Builder $query, string $categorySlug): Builder
+    {
+        return $query->whereHas('categories', fn (Builder $q) => $q->where('slug', $categorySlug));
+    }
+
+    /**
+     * Filters on a single freeform `meta` key/value pair, e.g.
+     * `->whereMeta('format', 'video')`. Stacks (AND) across calls, for
+     * page_list's multi-facet filtering.
+     */
+    public function scopeWhereMeta(Builder $query, string $key, string $value): Builder
+    {
+        return $query->where("meta->{$key}", $value);
+    }
+
+    /**
+     * The title to show in a listing card (page_list block, etc.) — falls
+     * back to the page's own `title` when no dedicated one is set. Not an
+     * accessor on `list_title` itself: Filament's edit form would otherwise
+     * show (and risk persisting) the fallback text into a field the editor
+     * actually left empty.
+     */
+    public function effectiveListTitle(): string
+    {
+        return $this->list_title ?: $this->title;
+    }
+
+    public function illustrationUrl(): ?string
+    {
+        return $this->getFirstMediaUrl(static::ILLUSTRATION_COLLECTION) ?: null;
+    }
+
+    /**
+     * The illustration is a single-file collection: attaching a new one
+     * replaces the previous file instead of accumulating.
+     */
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection(self::ILLUSTRATION_COLLECTION)->singleFile();
     }
 
     /**

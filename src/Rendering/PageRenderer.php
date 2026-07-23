@@ -27,14 +27,14 @@ class PageRenderer
     protected function resolveBlocks(Page $page): array
     {
         return collect($page->blocks ?? [])
-            ->map(function (array $block) {
+            ->map(function (array $block) use ($page) {
                 $blockClass = $this->registry->find($block['type']);
 
                 return [
                     'uuid' => $block['uuid'],
                     'type' => $block['type'],
                     'view' => $blockClass ? $this->viewResolver->blockView($blockClass) : null,
-                    'data' => $block['data'] ?? [],
+                    'data' => $blockClass ? $blockClass::resolveData($block['data'] ?? [], $page) : ($block['data'] ?? []),
                 ];
             })
             ->all();

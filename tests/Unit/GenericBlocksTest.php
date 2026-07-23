@@ -2,10 +2,12 @@
 
 use OursBlanc\Xms\Blocks\Generic\ColumnsBlock;
 use OursBlanc\Xms\Blocks\Generic\CtaBlock;
+use OursBlanc\Xms\Blocks\Generic\FormBlock;
 use OursBlanc\Xms\Blocks\Generic\GalleryBlock;
 use OursBlanc\Xms\Blocks\Generic\HeadingBlock;
 use OursBlanc\Xms\Blocks\Generic\HeroBlock;
 use OursBlanc\Xms\Blocks\Generic\ImageBlock;
+use OursBlanc\Xms\Blocks\Generic\PageListBlock;
 use OursBlanc\Xms\Blocks\Generic\TextBlock;
 use OursBlanc\Xms\Blocks\Generic\VideoBlock;
 
@@ -18,6 +20,8 @@ dataset('generic_blocks', [
     'video' => [VideoBlock::class],
     'cta' => [CtaBlock::class],
     'columns' => [ColumnsBlock::class],
+    'page_list' => [PageListBlock::class],
+    'form' => [FormBlock::class],
 ]);
 
 it('exposes a complete, non-empty self-description for every generic block', function (string $blockClass) {

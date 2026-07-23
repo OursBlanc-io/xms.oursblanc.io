@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use OursBlanc\Xms\Http\Controllers\FormSubmissionController;
 use OursBlanc\Xms\Http\Controllers\PreviewController;
 use OursBlanc\Xms\Http\Controllers\RenderController;
 use OursBlanc\Xms\Http\Controllers\SitemapController;
@@ -10,6 +11,10 @@ Route::middleware('web')->group(function () {
     Route::get('/sitemap.xml', SitemapController::class)->name('xms.sitemap');
 
     Route::get('/xms/preview/{page}', PreviewController::class)->name('xms.preview');
+
+    Route::post('/xms/forms/{form:slug}/submit', FormSubmissionController::class)
+        ->middleware('throttle:'.config('xms.forms.throttle', '10,1'))
+        ->name('xms.forms.submit');
 
     $locales = config('xms.locales', []);
     $defaultLocale = config('xms.default_locale');

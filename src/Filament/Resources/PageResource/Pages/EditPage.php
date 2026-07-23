@@ -17,6 +17,12 @@ class EditPage extends EditRecord
 {
     protected static string $resource = PageResource::class;
 
+    /**
+     * See CreatePage: `illustration` isn't a real column, it's synced into a
+     * media collection in afterSave() and must be pulled out of $data first.
+     */
+    protected ?string $pendingIllustration = null;
+
     protected function getHeaderActions(): array
     {
         return [
@@ -32,6 +38,7 @@ class EditPage extends EditRecord
     protected function mutateFormDataBeforeFill(array $data): array
     {
         $data['blocks'] = BuilderStateTransformer::toBuilderState($data['blocks'] ?? []);
+        $data['illustration'] = $this->record->getFirstMedia(Page::ILLUSTRATION_COLLECTION)?->id;
 
         return $data;
     }
@@ -39,6 +46,10 @@ class EditPage extends EditRecord
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $data['blocks'] = BuilderStateTransformer::toStoredState($data['blocks'] ?? []);
+        $data['slug'] ??= '';
+
+        $this->pendingIllustration = $data['illustration'] ?? null;
+        unset($data['illustration']);
 
         return $data;
     }
@@ -46,6 +57,7 @@ class EditPage extends EditRecord
     protected function afterSave(): void
     {
         app(PageMediaSynchronizer::class)->sync($this->record);
+        app(PageMediaSynchronizer::class)->syncIllustration($this->record, $this->pendingIllustration);
 
         $this->fillForm();
     }

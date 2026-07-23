@@ -8,22 +8,34 @@ use Illuminate\Support\ServiceProvider;
 use OursBlanc\Xms\Blocks\Block;
 use OursBlanc\Xms\Blocks\BlockRegistry;
 use OursBlanc\Xms\Blocks\BlockValidator;
+use OursBlanc\Xms\Blocks\Generic\AuroraHeroBlock;
+use OursBlanc\Xms\Blocks\Generic\ChecklistGridBlock;
 use OursBlanc\Xms\Blocks\Generic\ColumnsBlock;
+use OursBlanc\Xms\Blocks\Generic\CtaBannerBlock;
 use OursBlanc\Xms\Blocks\Generic\CtaBlock;
+use OursBlanc\Xms\Blocks\Generic\FeatureGridBlock;
+use OursBlanc\Xms\Blocks\Generic\FormBlock;
 use OursBlanc\Xms\Blocks\Generic\GalleryBlock;
 use OursBlanc\Xms\Blocks\Generic\HeadingBlock;
 use OursBlanc\Xms\Blocks\Generic\HeroBlock;
 use OursBlanc\Xms\Blocks\Generic\ImageBlock;
+use OursBlanc\Xms\Blocks\Generic\PageListBlock;
+use OursBlanc\Xms\Blocks\Generic\SpecSheetBlock;
+use OursBlanc\Xms\Blocks\Generic\StatCountersBlock;
+use OursBlanc\Xms\Blocks\Generic\TabbedShowcaseBlock;
+use OursBlanc\Xms\Blocks\Generic\TaggedHighlightsBlock;
 use OursBlanc\Xms\Blocks\Generic\TextBlock;
 use OursBlanc\Xms\Blocks\Generic\VideoBlock;
 use OursBlanc\Xms\Cache\CacheInvalidator;
 use OursBlanc\Xms\Cache\CloudflareInvalidator;
 use OursBlanc\Xms\Cache\NullInvalidator;
 use OursBlanc\Xms\Console\PruneOrphanedMediaCommand;
+use OursBlanc\Xms\Events\FormSubmitted;
 use OursBlanc\Xms\Events\PagePublished;
 use OursBlanc\Xms\Events\PageSaved;
 use OursBlanc\Xms\Events\PageUnpublished;
 use OursBlanc\Xms\Listeners\DispatchCdnPurge;
+use OursBlanc\Xms\Listeners\DispatchFormNotifications;
 use OursBlanc\Xms\Media\FfmpegVideoProcessor;
 use OursBlanc\Xms\Media\PageMediaSynchronizer;
 use OursBlanc\Xms\Media\VideoProcessor;
@@ -45,6 +57,16 @@ class XmsServiceProvider extends ServiceProvider
         VideoBlock::class,
         CtaBlock::class,
         ColumnsBlock::class,
+        AuroraHeroBlock::class,
+        ChecklistGridBlock::class,
+        TabbedShowcaseBlock::class,
+        FeatureGridBlock::class,
+        StatCountersBlock::class,
+        TaggedHighlightsBlock::class,
+        CtaBannerBlock::class,
+        SpecSheetBlock::class,
+        PageListBlock::class,
+        FormBlock::class,
     ];
 
     public function register(): void
@@ -116,5 +138,6 @@ class XmsServiceProvider extends ServiceProvider
         });
 
         Event::listen([PageSaved::class, PagePublished::class, PageUnpublished::class], DispatchCdnPurge::class);
+        Event::listen(FormSubmitted::class, DispatchFormNotifications::class);
     }
 }

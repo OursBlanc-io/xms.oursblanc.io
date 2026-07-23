@@ -40,7 +40,7 @@ it('runs the full end-to-end MCP scenario: discover, create, patch, attach media
 
     // 1. Discover the available block types.
     $blockTypes = XmsMcpServer::tool(ListBlockTypesTool::class)->assertOk();
-    $blockTypes->assertStructuredContent(fn ($json) => $json->has('block_types', 8)->etc());
+    $blockTypes->assertStructuredContent(fn ($json) => $json->has('block_types', 18)->etc());
 
     // 2. Build and create a 5-block page.
     $created = XmsMcpServer::tool(CreatePageTool::class, [

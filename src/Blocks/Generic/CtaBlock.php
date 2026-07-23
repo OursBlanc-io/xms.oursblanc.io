@@ -32,7 +32,7 @@ class CtaBlock extends Block
             TextInput::make('button_label')
                 ->required(),
             TextInput::make('button_url')
-                ->url()
+                ->regex('/^(#[^\s]*|\/[^\s]*|https?:\/\/[^\s]+)$/')
                 ->required(),
             Select::make('style')
                 ->options([

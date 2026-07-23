@@ -81,6 +81,20 @@ it('leaves an already-attached media id untouched', function () {
     expect($page->fresh()->blocks[0]['data']['image'])->toBe(42);
 });
 
+it('leaves an already-attached media id untouched even when it round-trips back as a numeric string', function () {
+    // PageMediaUpload re-displays an already-synced field so the browser can
+    // preview it again, which sends it back through Livewire as a string
+    // (e.g. "42"), not the original PHP int this class wrote — this must not
+    // be treated as a brand new pending upload path (see attachIfPending()).
+    $page = heroPage([
+        ['uuid' => 'u1', 'type' => 'hero', 'data' => ['title' => 'T', 'alignment' => 'left', 'image' => '42']],
+    ]);
+
+    app(PageMediaSynchronizer::class)->sync($page);
+
+    expect($page->fresh()->blocks[0]['data']['image'])->toBe('42');
+});
+
 it('attaches media inside a repeater via dot-star media field paths', function () {
     $path = putPendingImageFixture();
 
@@ -194,4 +208,39 @@ it('auto-generates a poster for an uploaded video with no explicit poster', func
 
     expect($poster->collection_name)->toBe('block-v1')
         ->and($poster->getCustomProperty('is_poster_for'))->toBe($data['video']);
+});
+
+it('syncIllustration attaches a pending upload to the page-level illustration collection', function () {
+    $path = putPendingImageFixture();
+    $page = heroPage([]);
+
+    $result = app(PageMediaSynchronizer::class)->syncIllustration($page, $path);
+
+    expect($result)->toBeTrue();
+
+    $media = $page->fresh()->getFirstMedia(Page::ILLUSTRATION_COLLECTION);
+
+    expect($media)->not->toBeNull();
+});
+
+it('syncIllustration replaces the previous illustration instead of accumulating', function () {
+    $page = heroPage([]);
+
+    app(PageMediaSynchronizer::class)->syncIllustration($page, putPendingImageFixture('xms-pending/first.png'));
+    app(PageMediaSynchronizer::class)->syncIllustration($page->fresh(), putPendingImageFixture('xms-pending/second.png'));
+
+    expect($page->fresh()->getMedia(Page::ILLUSTRATION_COLLECTION))->toHaveCount(1);
+});
+
+it('syncIllustration leaves an already-attached media id (even as a numeric string) untouched', function () {
+    $page = heroPage([]);
+
+    expect(app(PageMediaSynchronizer::class)->syncIllustration($page, '42'))->toBeFalse();
+});
+
+it('syncIllustration does nothing when no value is given', function () {
+    $page = heroPage([]);
+
+    expect(app(PageMediaSynchronizer::class)->syncIllustration($page, null))->toBeFalse()
+        ->and(app(PageMediaSynchronizer::class)->syncIllustration($page, ''))->toBeFalse();
 });

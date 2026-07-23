@@ -34,6 +34,11 @@ class UpdatePageTool extends AbstractXmsTool
                 ])
             ),
             'seo' => $schema->object([]),
+            'category_ids' => $schema->array()->items($schema->integer())
+                ->description('Replaces the page\'s categories entirely. Omit to leave categories unchanged.'),
+            'list_title' => $schema->string(),
+            'list_excerpt' => $schema->string(),
+            'meta' => $schema->object([])->description('Replaces the page\'s entire metadata object. Omit to leave it unchanged.'),
         ];
     }
 
@@ -51,6 +56,12 @@ class UpdatePageTool extends AbstractXmsTool
         $rules = [
             'title' => 'sometimes|string|max:255',
             'seo' => 'sometimes|array',
+            'category_ids' => 'sometimes|array',
+            'category_ids.*' => 'integer|exists:xms_categories,id',
+            'list_title' => 'sometimes|nullable|string|max:255',
+            'list_excerpt' => 'sometimes|nullable|string',
+            'meta' => 'sometimes|array',
+            'meta.*' => 'string',
         ];
 
         if ($request->get('slug') !== null) {
@@ -67,7 +78,11 @@ class UpdatePageTool extends AbstractXmsTool
 
         $validated = $request->validate($rules);
 
-        $update = array_intersect_key($validated, array_flip(['title', 'slug', 'seo']));
+        $update = array_intersect_key($validated, array_flip(['title', 'slug', 'seo', 'list_title', 'list_excerpt', 'meta']));
+
+        if (isset($validated['category_ids'])) {
+            $page->categories()->sync($validated['category_ids']);
+        }
 
         if (isset($validated['blocks'])) {
             // See CreatePageTool: validate() strips each block's `data` since no

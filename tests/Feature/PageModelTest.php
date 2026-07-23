@@ -96,3 +96,29 @@ it('dispatches PageSaved on every save and PagePublished when the status flips t
 
     Event::assertDispatched(PageUnpublished::class);
 });
+
+it('filters pages by a meta key/value pair', function () {
+    makeBasicPage(['slug' => 'a', 'meta' => ['format' => 'video']]);
+    makeBasicPage(['slug' => 'b', 'meta' => ['format' => 'display']]);
+
+    $matches = Page::query()->whereMeta('format', 'video')->get();
+
+    expect($matches)->toHaveCount(1)
+        ->and($matches->first()->slug)->toBe('a');
+});
+
+it('falls back to title when list_title is empty', function () {
+    $page = makeBasicPage(['list_title' => null]);
+
+    expect($page->effectiveListTitle())->toBe('Accueil');
+
+    $page->update(['list_title' => 'Card title']);
+
+    expect($page->fresh()->effectiveListTitle())->toBe('Card title');
+});
+
+it('has no illustration url until one is attached', function () {
+    $page = makeBasicPage();
+
+    expect($page->illustrationUrl())->toBeNull();
+});

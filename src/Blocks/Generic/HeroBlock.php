@@ -2,10 +2,12 @@
 
 namespace OursBlanc\Xms\Blocks\Generic;
 
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use OursBlanc\Xms\Blocks\Block;
 use OursBlanc\Xms\Filament\Forms\Components\PageMediaUpload;
+use OursBlanc\Xms\Filament\Forms\Components\PexelsPicker;
 
 class HeroBlock extends Block
 {
@@ -31,10 +33,11 @@ class HeroBlock extends Block
                 ->required(),
             TextInput::make('subtitle'),
             PageMediaUpload::make('image')
-                ->image(),
+                ->image()
+                ->hintAction(PexelsPicker::image('image', attributionField: 'attribution', attributionUrlField: 'attribution_url')),
             TextInput::make('cta_label'),
             TextInput::make('cta_url')
-                ->url(),
+                ->regex('/^(#[^\s]*|\/[^\s]*|https?:\/\/[^\s]+)$/'),
             Select::make('alignment')
                 ->options([
                     'left' => 'Left',
@@ -43,6 +46,17 @@ class HeroBlock extends Block
                 ])
                 ->default('left')
                 ->required(),
+            Select::make('style')
+                ->options([
+                    'boxed-dark' => 'Boxed — dark',
+                    'boxed-light' => 'Boxed — light',
+                    'plain-dark' => 'Plain — dark',
+                    'plain-light' => 'Plain — light',
+                ])
+                ->default('boxed-dark')
+                ->required(),
+            Hidden::make('attribution'),
+            Hidden::make('attribution_url'),
         ];
     }
 

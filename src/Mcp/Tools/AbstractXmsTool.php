@@ -47,6 +47,35 @@ abstract class AbstractXmsTool extends Tool
     }
 
     /**
+     * Validation rules for a menu's `items`, shared by create_menu/update_menu.
+     * Menus are two levels deep: top-level items may have `children`, but
+     * children may not have children of their own.
+     *
+     * @return array<string, mixed>
+     */
+    protected function menuItemRules(): array
+    {
+        $leaf = [
+            'label' => 'required|string|max:255',
+            'link_type' => 'nullable|in:page,url',
+            'url' => 'nullable|string|max:2000',
+            'page_id' => 'nullable|integer|exists:xms_pages,id',
+        ];
+
+        $rules = [];
+
+        foreach ($leaf as $field => $rule) {
+            $rules["items.*.{$field}"] = $rule;
+            $rules["items.*.children.*.{$field}"] = $rule;
+        }
+
+        $rules['items'] = 'required|array';
+        $rules['items.*.children'] = 'nullable|array';
+
+        return $rules;
+    }
+
+    /**
      * Structured, actionable validation errors: the field-level messages
      * plus the JSON Schema of every block type involved, so the calling AI
      * can self-correct without external documentation.

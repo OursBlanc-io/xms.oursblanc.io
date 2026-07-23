@@ -66,4 +66,32 @@ return [
     'mcp' => [
         'route' => env('XMS_MCP_ROUTE', '/mcp/xms'),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Forms
+    |--------------------------------------------------------------------------
+    */
+    'forms' => [
+        // Name of the hidden honeypot input; bots that fill it in are silently rejected.
+        'honeypot_field' => '_xms_hp',
+
+        // Max submissions per minute per IP, across all forms.
+        'throttle' => '10,1',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Pexels
+    |--------------------------------------------------------------------------
+    |
+    | Powers the "Search Pexels" picker on image/video fields in the admin.
+    | Leave XMS_PEXELS_API_KEY unset to hide the picker entirely.
+    |
+    */
+    'pexels' => [
+        'api_key' => env('XMS_PEXELS_API_KEY', env('PEXELS_API_KEY')),
+        'photo_max_bytes' => 10 * 1024 * 1024,
+        'video_max_bytes' => 40 * 1024 * 1024,
+    ],
 ];
