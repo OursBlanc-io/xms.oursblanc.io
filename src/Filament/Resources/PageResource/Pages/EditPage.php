@@ -12,6 +12,7 @@ use OursBlanc\Xms\Blocks\BuilderStateTransformer;
 use OursBlanc\Xms\Filament\Resources\PageResource;
 use OursBlanc\Xms\Media\PageMediaSynchronizer;
 use OursBlanc\Xms\Models\Page;
+use OursBlanc\Xms\Support\PageDuplicator;
 
 class EditPage extends EditRecord
 {
@@ -28,6 +29,7 @@ class EditPage extends EditRecord
         return [
             $this->publishAction(),
             $this->unpublishAction(),
+            $this->duplicatePageAction(),
             $this->duplicateAction(),
             $this->historyAction(),
             $this->previewAction(),
@@ -94,6 +96,28 @@ class EditPage extends EditRecord
                 $this->refreshFormData(['status']);
 
                 Notification::make()->title('Page unpublished')->success()->send();
+            });
+    }
+
+    /**
+     * A true copy: independent draft, own translation group, regenerated
+     * block uuids, and its own physical copies of every media file — safe
+     * to edit freely without touching the original. See PageDuplicator.
+     */
+    protected function duplicatePageAction(): Action
+    {
+        return Action::make('duplicatePage')
+            ->label('Duplicate')
+            ->icon('heroicon-o-square-2-stack')
+            ->color('gray')
+            ->requiresConfirmation()
+            ->modalDescription('Creates an independent draft copy of this page that you can edit freely.')
+            ->action(function () {
+                $duplicate = app(PageDuplicator::class)->duplicate($this->record);
+
+                Notification::make()->title('Page duplicated')->success()->send();
+
+                $this->redirect(static::getResource()::getUrl('edit', ['record' => $duplicate]));
             });
     }
 

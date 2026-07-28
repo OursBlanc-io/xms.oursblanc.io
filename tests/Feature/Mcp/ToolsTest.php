@@ -2,6 +2,7 @@
 
 use OursBlanc\Xms\Mcp\Tools\AttachMediaFromUrlTool;
 use OursBlanc\Xms\Mcp\Tools\CreatePageTool;
+use OursBlanc\Xms\Mcp\Tools\DuplicatePageTool;
 use OursBlanc\Xms\Mcp\Tools\GetPageTool;
 use OursBlanc\Xms\Mcp\Tools\ListBlockTypesTool;
 use OursBlanc\Xms\Mcp\Tools\ListPagesTool;
@@ -305,4 +306,34 @@ it('attach_media_from_url rejects a private/internal url', function () {
         'field' => 'image',
         'url' => 'http://169.254.169.254/latest/meta-data/',
     ])->assertHasErrors(['disallowed private/internal address']);
+});
+
+it('duplicate_page creates an independent draft copy', function () {
+    $this->actingAsApiToken();
+
+    $page = Page::create([
+        'locale' => 'fr', 'slug' => 'accueil', 'title' => 'X',
+        'blocks' => [['uuid' => 'a', 'type' => 'text', 'data' => ['content' => 'Hello']]],
+        'seo' => [], 'status' => 'published',
+    ]);
+
+    $response = XmsMcpServer::tool(DuplicatePageTool::class, ['id' => $page->id])
+        ->assertOk();
+
+    expect(Page::count())->toBe(2);
+
+    $duplicate = Page::where('id', '!=', $page->id)->sole();
+
+    expect($duplicate->slug)->toBe('accueil-copy')
+        ->and($duplicate->status)->toBe('draft')
+        ->and($duplicate->blocks[0]['uuid'])->not->toBe('a');
+
+    $response->assertStructuredContent(fn ($json) => $json->where('id', $duplicate->id)->etc());
+});
+
+it('duplicate_page returns an actionable error for an unknown id', function () {
+    $this->actingAsApiToken();
+
+    XmsMcpServer::tool(DuplicatePageTool::class, ['id' => 999])
+        ->assertHasErrors(['No page with id']);
 });

@@ -11,6 +11,7 @@ use OursBlanc\Xms\Mcp\Tools\CreateMenuTool;
 use OursBlanc\Xms\Mcp\Tools\CreatePageTool;
 use OursBlanc\Xms\Mcp\Tools\DeleteCategoryTool;
 use OursBlanc\Xms\Mcp\Tools\DeleteMenuTool;
+use OursBlanc\Xms\Mcp\Tools\DuplicatePageTool;
 use OursBlanc\Xms\Mcp\Tools\GetCategoryTool;
 use OursBlanc\Xms\Mcp\Tools\GetFormTool;
 use OursBlanc\Xms\Mcp\Tools\GetMenuTool;
@@ -69,6 +70,7 @@ class XmsMcpServer extends Server
         GetPageTool::class,
         CreatePageTool::class,
         UpdatePageTool::class,
+        DuplicatePageTool::class,
         PatchBlocksTool::class,
         AttachMediaFromUrlTool::class,
         AttachPageIllustrationTool::class,
