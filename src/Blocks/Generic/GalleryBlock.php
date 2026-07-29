@@ -3,9 +3,11 @@
 namespace OursBlanc\Xms\Blocks\Generic;
 
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Get;
 use OursBlanc\Xms\Blocks\Block;
 use OursBlanc\Xms\Filament\Forms\Components\PageMediaUpload;
 use OursBlanc\Xms\Filament\Forms\Components\PexelsPicker;
@@ -36,10 +38,17 @@ class GalleryBlock extends Block
                         ->image()
                         ->required()
                         ->hintAction(PexelsPicker::image('image', 'alt', 'attribution', 'attribution_url')),
+                    Placeholder::make('image_preview')
+                        ->hiddenLabel()
+                        ->visible(fn (Get $get) => filled($get('image')))
+                        ->content(fn (Get $get) => PageMediaUpload::imagePreviewHtml($get('image'))),
                     TextInput::make('alt'),
                     Hidden::make('attribution'),
                     Hidden::make('attribution_url'),
-                ]),
+                ])
+                ->itemLabel(fn (array $state): ?string => $state['alt'] ?? null)
+                ->collapsible()
+                ->collapsed(),
             Select::make('columns')
                 ->options([
                     '2' => '2',

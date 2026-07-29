@@ -5,6 +5,7 @@ namespace OursBlanc\Xms\Blocks\Generic;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Illuminate\Support\Str;
 use OursBlanc\Xms\Blocks\Block;
 
 class StatCountersBlock extends Block
@@ -37,6 +38,9 @@ class StatCountersBlock extends Block
                     TextInput::make('label')
                         ->required(),
                 ])
+                ->itemLabel(fn (array $state): ?string => $state['label'] ?? null)
+                ->collapsible()
+                ->collapsed()
                 ->minItems(1)
                 ->maxItems(4)
                 ->required(),
@@ -49,6 +53,9 @@ class StatCountersBlock extends Block
                 ->schema([
                     Textarea::make('text')->required(),
                 ])
+                ->itemLabel(fn (array $state): ?string => isset($state['text']) ? Str::limit($state['text'], 40) : null)
+                ->collapsible()
+                ->collapsed()
                 ->minItems(1)
                 ->maxItems(4)
                 ->required(),

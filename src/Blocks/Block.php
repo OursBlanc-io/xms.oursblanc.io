@@ -71,4 +71,20 @@ abstract class Block
     {
         return [];
     }
+
+    /**
+     * Dot-paths to fields holding an array of *other blocks* (uuid/type/data
+     * triples), e.g. a nested `Builder` field inside a `Repeater` item —
+     * supports one `.*.` repeater-wildcard segment, same convention as
+     * `mediaFields()`. Declaring a path here is what makes
+     * BuilderStateTransformer and PageMediaSynchronizer recurse into it, so
+     * nested blocks get the same stable uuid (and therefore working media
+     * uploads) as top-level page blocks.
+     *
+     * @return array<int, string>
+     */
+    public static function nestedBlockFields(): array
+    {
+        return [];
+    }
 }

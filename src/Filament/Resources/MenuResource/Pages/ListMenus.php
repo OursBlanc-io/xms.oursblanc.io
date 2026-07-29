@@ -3,10 +3,10 @@
 namespace OursBlanc\Xms\Filament\Resources\MenuResource\Pages;
 
 use Filament\Actions\CreateAction;
-use Filament\Resources\Pages\ManageRecords;
+use Filament\Resources\Pages\ListRecords;
 use OursBlanc\Xms\Filament\Resources\MenuResource;
 
-class ManageMenus extends ManageRecords
+class ListMenus extends ListRecords
 {
     protected static string $resource = MenuResource::class;
 

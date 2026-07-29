@@ -4,15 +4,15 @@ namespace OursBlanc\Xms\Filament\Resources\PageResource\Schemas;
 
 use Filament\Forms\Components\Builder;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\KeyValue;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Str;
 use OursBlanc\Xms\Blocks\BlockRegistry;
 use OursBlanc\Xms\Filament\Forms\Components\PageMediaUpload;
 use OursBlanc\Xms\Models\Page;
@@ -108,6 +108,10 @@ class PageForm
                             PageMediaUpload::make('illustration')
                                 ->image()
                                 ->helperText('Cover image used in listing cards — separate from any image used in the page\'s own blocks.'),
+                            Placeholder::make('illustration_preview')
+                                ->hiddenLabel()
+                                ->visible(fn (Get $get) => filled($get('illustration')))
+                                ->content(fn (Get $get) => PageMediaUpload::imagePreviewHtml($get('illustration'))),
                             KeyValue::make('meta')
                                 ->label('Metadata')
                                 ->keyLabel('Key')
@@ -121,16 +125,7 @@ class PageForm
 
     protected static function blocksBuilder(): Builder
     {
-        $registry = app(BlockRegistry::class);
-
-        $blocks = collect($registry->all())->map(
-            fn (string $blockClass, string $name) => Builder\Block::make($name)
-                ->label($blockClass::label())
-                ->schema([
-                    Hidden::make('uuid')->default(fn () => (string) Str::uuid()),
-                    ...$blockClass::fields(),
-                ])
-        )->values()->all();
+        $blocks = app(BlockRegistry::class)->builderBlocks();
 
         return Builder::make('blocks')
             ->blocks($blocks)

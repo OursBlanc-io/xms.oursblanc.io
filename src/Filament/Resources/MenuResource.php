@@ -7,7 +7,9 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use OursBlanc\Xms\Filament\Resources\MenuResource\Pages\ManageMenus;
+use OursBlanc\Xms\Filament\Resources\MenuResource\Pages\CreateMenu;
+use OursBlanc\Xms\Filament\Resources\MenuResource\Pages\EditMenu;
+use OursBlanc\Xms\Filament\Resources\MenuResource\Pages\ListMenus;
 use OursBlanc\Xms\Filament\Resources\MenuResource\Schemas\MenuForm;
 use OursBlanc\Xms\Filament\Resources\MenuResource\Tables\MenusTable;
 use OursBlanc\Xms\Models\Menu;
@@ -31,7 +33,9 @@ class MenuResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ManageMenus::route('/'),
+            'index' => ListMenus::route('/'),
+            'create' => CreateMenu::route('/create'),
+            'edit' => EditMenu::route('/{record}/edit'),
         ];
     }
 }

@@ -14,19 +14,29 @@ class CreateMenuTool extends AbstractXmsTool
     protected string $name = 'create_menu';
 
     protected string $description = 'Create a menu for a (location, locale) pair — e.g. "header"/"fr". '.
-        'Each item has a `label` and either `link_type: "page"` with a `page_id`, or `link_type: "url"` with a '.
-        'raw `url` (also used for anchors like "#formats"). Items may have one level of `children`, no deeper.';
+        'Each item has a `label` and one of: `link_type: "page"` with a `page_id`, `link_type: "url"` with a '.
+        'raw `url` (also used for anchors like "#formats"), or `link_type: "language_switch"` with a '.
+        '`target_locale` (links to the current page\'s translation in that locale, or its homepage if none — '.
+        'use this instead of hardcoding a locale URL, since the target adapts per page). `target` ("_self", the '.
+        'default, or "_blank") controls whether page/url links open in a new tab; not used for language_switch. '.
+        'Top-level items may set `display` ("link", the default, "button_primary", or "button_secondary") to '.
+        'render as a button instead of a plain link — children (dropdown entries) are always plain links. Items '.
+        'may have one level of `children`, no deeper.';
 
     protected function itemSchema(JsonSchema $schema, bool $withChildren): array
     {
         $fields = [
             'label' => $schema->string()->required(),
-            'link_type' => $schema->string()->enum(['page', 'url'])->description('Defaults to "url".'),
+            'link_type' => $schema->string()->enum(['page', 'url', 'language_switch'])->description('Defaults to "url".'),
             'url' => $schema->string()->description('Required when link_type is "url".'),
             'page_id' => $schema->integer()->description('Required when link_type is "page".'),
+            'target_locale' => $schema->string()->description('Required when link_type is "language_switch", e.g. "en".'),
+            'target' => $schema->string()->enum(['_self', '_blank'])->description('Defaults to "_self". Not used for language_switch.'),
         ];
 
         if ($withChildren) {
+            $fields['display'] = $schema->string()->enum(['link', 'button_primary', 'button_secondary'])
+                ->description('Defaults to "link". Only meaningful on top-level items.');
             $fields['children'] = $schema->array()->items($schema->object($this->itemSchema($schema, false)));
         }
 

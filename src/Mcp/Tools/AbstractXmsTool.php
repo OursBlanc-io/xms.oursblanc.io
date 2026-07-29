@@ -49,7 +49,9 @@ abstract class AbstractXmsTool extends Tool
     /**
      * Validation rules for a menu's `items`, shared by create_menu/update_menu.
      * Menus are two levels deep: top-level items may have `children`, but
-     * children may not have children of their own.
+     * children may not have children of their own. `display` (link vs.
+     * button) only applies to top-level items — children always render as
+     * plain links inside their dropdown.
      *
      * @return array<string, mixed>
      */
@@ -57,9 +59,11 @@ abstract class AbstractXmsTool extends Tool
     {
         $leaf = [
             'label' => 'required|string|max:255',
-            'link_type' => 'nullable|in:page,url',
+            'link_type' => 'nullable|in:page,url,language_switch',
             'url' => 'nullable|string|max:2000',
             'page_id' => 'nullable|integer|exists:xms_pages,id',
+            'target_locale' => 'nullable|string|max:10',
+            'target' => 'nullable|in:_self,_blank',
         ];
 
         $rules = [];
@@ -70,6 +74,7 @@ abstract class AbstractXmsTool extends Tool
         }
 
         $rules['items'] = 'required|array';
+        $rules['items.*.display'] = 'nullable|in:link,button_primary,button_secondary';
         $rules['items.*.children'] = 'nullable|array';
 
         return $rules;

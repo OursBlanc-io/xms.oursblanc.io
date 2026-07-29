@@ -37,6 +37,9 @@ class FeatureGridBlock extends Block
                     TextInput::make('title')->required(),
                     TextInput::make('text')->required(),
                 ])
+                ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
+                ->collapsible()
+                ->collapsed()
                 ->minItems(1)
                 ->maxItems(6)
                 ->required(),

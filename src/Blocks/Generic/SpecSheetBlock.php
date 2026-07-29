@@ -32,12 +32,18 @@ class SpecSheetBlock extends Block
                     TextInput::make('label')->required(),
                     TextInput::make('value')->required(),
                 ])
+                ->itemLabel(fn (array $state): ?string => $state['label'] ?? null)
+                ->collapsible()
+                ->collapsed()
                 ->minItems(1)
                 ->required(),
             Repeater::make('tags')
                 ->schema([
                     TextInput::make('name')->required(),
-                ]),
+                ])
+                ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
+                ->collapsible()
+                ->collapsed(),
         ];
     }
 

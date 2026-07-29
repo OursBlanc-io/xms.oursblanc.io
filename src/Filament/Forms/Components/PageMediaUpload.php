@@ -3,7 +3,9 @@
 namespace OursBlanc\Xms\Filament\Forms\Components;
 
 use Filament\Forms\Components\FileUpload;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
@@ -101,5 +103,26 @@ class PageMediaUpload extends FileUpload
         $disk = Storage::disk(config('xms.media_disk'));
 
         return $disk->exists($value) ? $disk->url($value) : null;
+    }
+
+    /**
+     * A plain <img>, as a companion `Placeholder` next to the field (see any
+     * block's use of `imagePreviewHtml()` below) — FilePond's own preview
+     * plugin doesn't reliably render a thumbnail for a file reloaded from
+     * the server (same limitation as VideoBlock::previewHtml() works around
+     * for video), so this is a guaranteed-correct fallback built directly
+     * from the resolved URL instead.
+     */
+    public static function imagePreviewHtml(mixed $value, string $maxHeight = '10rem'): ?Htmlable
+    {
+        $url = static::resolveUrl($value);
+
+        if (! $url) {
+            return null;
+        }
+
+        return new HtmlString(
+            '<img src="'.e($url).'" alt="" style="max-height: '.e($maxHeight).'; max-width: 100%; border-radius: 0.5rem; display: block;">'
+        );
     }
 }

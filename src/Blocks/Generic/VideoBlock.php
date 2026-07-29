@@ -52,6 +52,10 @@ class VideoBlock extends Block
                 ->image()
                 ->helperText('Auto-generated from the video via ffmpeg if left empty.')
                 ->hintAction(PexelsPicker::image('poster')),
+            Placeholder::make('poster_preview')
+                ->hiddenLabel()
+                ->visible(fn (Get $get) => filled($get('poster')))
+                ->content(fn (Get $get) => PageMediaUpload::imagePreviewHtml($get('poster'))),
             Toggle::make('autoplay')
                 ->default(false)
                 ->helperText('Browsers only allow autoplay when the video is also muted.'),

@@ -7,6 +7,7 @@ use Filament\Panel;
 use OursBlanc\Xms\Filament\Resources\ApiTokenResource;
 use OursBlanc\Xms\Filament\Resources\CategoryResource;
 use OursBlanc\Xms\Filament\Resources\CodeSnippetResource;
+use OursBlanc\Xms\Filament\Resources\ConfigurationResource;
 use OursBlanc\Xms\Filament\Resources\FormResource;
 use OursBlanc\Xms\Filament\Resources\FormSubmissionResource;
 use OursBlanc\Xms\Filament\Resources\MenuResource;
@@ -31,6 +32,7 @@ class XmsPlugin implements Plugin
             CategoryResource::class,
             MenuResource::class,
             CodeSnippetResource::class,
+            ConfigurationResource::class,
             FormResource::class,
             FormSubmissionResource::class,
             ApiTokenResource::class,

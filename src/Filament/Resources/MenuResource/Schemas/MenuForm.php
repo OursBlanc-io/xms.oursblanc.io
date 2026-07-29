@@ -35,8 +35,10 @@ class MenuForm
             Repeater::make('items')
                 ->label('Menu items')
                 ->schema(static::itemFields(withChildren: true))
+                ->itemLabel(fn (array $state): ?string => $state['label'] ?? null)
                 ->addActionLabel('Add item')
                 ->collapsible()
+                ->collapsed()
                 ->columnSpanFull(),
         ]);
     }
@@ -55,6 +57,7 @@ class MenuForm
                 ->options([
                     'page' => 'Internal page',
                     'url' => 'Custom URL / anchor',
+                    'language_switch' => 'Language switch',
                 ])
                 ->default('url')
                 ->live()
@@ -70,15 +73,44 @@ class MenuForm
             TextInput::make('url')
                 ->label('URL / anchor')
                 ->helperText('e.g. #formats or https://...')
-                ->visible(fn (Get $get) => $get('link_type') !== 'page'),
+                ->visible(fn (Get $get) => $get('link_type') === 'url'),
+            Select::make('target_locale')
+                ->label('Target locale')
+                ->options(array_combine(config('xms.locales'), config('xms.locales')))
+                ->helperText("Links to the current page's translation in this locale, or that locale's homepage if it has none. Hidden automatically while already viewing it.")
+                ->visible(fn (Get $get) => $get('link_type') === 'language_switch')
+                ->required(fn (Get $get) => $get('link_type') === 'language_switch'),
+            Select::make('target')
+                ->label('Open in')
+                ->options([
+                    '_self' => 'Current tab',
+                    '_blank' => 'New tab',
+                ])
+                ->default('_self')
+                ->required()
+                ->visible(fn (Get $get) => $get('link_type') !== 'language_switch'),
         ];
 
         if ($withChildren) {
+            // Only top-level items render in the nav bar itself (children
+            // are dropdown entries, always plain links there).
+            $fields[] = Select::make('display')
+                ->label('Display as')
+                ->options([
+                    'link' => 'Link',
+                    'button_primary' => 'Button — primary',
+                    'button_secondary' => 'Button — secondary',
+                ])
+                ->default('link')
+                ->required();
+
             $fields[] = Repeater::make('children')
                 ->label('Sub-items')
                 ->schema(static::itemFields(withChildren: false))
+                ->itemLabel(fn (array $state): ?string => $state['label'] ?? null)
                 ->addActionLabel('Add sub-item')
-                ->collapsible();
+                ->collapsible()
+                ->collapsed();
         }
 
         return $fields;

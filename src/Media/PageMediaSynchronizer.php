@@ -21,6 +21,20 @@ class PageMediaSynchronizer
     public function sync(Page $page): void
     {
         $blocks = $page->blocks ?? [];
+        $changed = $this->syncBlocks($page, $blocks);
+
+        if ($changed) {
+            $page->forceFill(['blocks' => $blocks])->saveQuietly();
+        }
+
+        $this->markOrphans($page->fresh());
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $blocks
+     */
+    protected function syncBlocks(Page $page, array &$blocks): bool
+    {
         $changed = false;
 
         foreach ($blocks as &$block) {
@@ -33,14 +47,41 @@ class PageMediaSynchronizer
             foreach ($blockClass::mediaFields() as $mediaFieldPath) {
                 $changed = $this->resolveMediaField($page, $block, $mediaFieldPath, $blockClass) || $changed;
             }
+
+            foreach ($blockClass::nestedBlockFields() as $nestedPath) {
+                $changed = $this->resolveNestedBlocks($page, $block, $nestedPath) || $changed;
+            }
         }
         unset($block);
 
-        if ($changed) {
-            $page->forceFill(['blocks' => $blocks])->saveQuietly();
+        return $changed;
+    }
+
+    /**
+     * Recurses `syncBlocks()` into a nested-blocks field (see
+     * Block::nestedBlockFields()) — each nested block gets its own media
+     * synced under its own uuid, exactly like a top-level page block.
+     */
+    protected function resolveNestedBlocks(Page $page, array &$block, string $path): bool
+    {
+        if (! str_contains($path, '.*.')) {
+            return isset($block['data'][$path]) && is_array($block['data'][$path])
+                && $this->syncBlocks($page, $block['data'][$path]);
         }
 
-        $this->markOrphans($page->fresh());
+        [$repeaterKey, $subField] = explode('.*.', $path, 2);
+        $changed = false;
+
+        if (isset($block['data'][$repeaterKey]) && is_array($block['data'][$repeaterKey])) {
+            foreach ($block['data'][$repeaterKey] as &$item) {
+                if (is_array($item) && isset($item[$subField]) && is_array($item[$subField])) {
+                    $changed = $this->syncBlocks($page, $item[$subField]) || $changed;
+                }
+            }
+            unset($item);
+        }
+
+        return $changed;
     }
 
     /**
@@ -173,7 +214,7 @@ class PageMediaSynchronizer
      */
     protected function markOrphans(Page $page): void
     {
-        $activeUuids = collect($page->blocks ?? [])->pluck('uuid')->filter()->all();
+        $activeUuids = $this->collectBlockUuids($page->blocks ?? []);
 
         foreach ($page->media as $media) {
             if (! str_starts_with($media->collection_name, 'block-')) {
@@ -196,6 +237,56 @@ class PageMediaSynchronizer
                 $media->save();
             }
         }
+    }
+
+    /**
+     * Every block uuid in $blocks, recursing into nested-blocks fields (see
+     * Block::nestedBlockFields()) so a nested block's media isn't wrongly
+     * flagged as orphaned.
+     *
+     * @param  array<int, array<string, mixed>>  $blocks
+     * @return array<int, string>
+     */
+    protected function collectBlockUuids(array $blocks): array
+    {
+        $uuids = [];
+
+        foreach ($blocks as $block) {
+            if (empty($block['uuid'])) {
+                continue;
+            }
+
+            $uuids[] = $block['uuid'];
+            $blockClass = $this->registry->find($block['type'] ?? '');
+
+            foreach ($blockClass ? $blockClass::nestedBlockFields() : [] as $path) {
+                $uuids = array_merge($uuids, $this->collectNestedUuids($block['data'] ?? [], $path));
+            }
+        }
+
+        return $uuids;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<int, string>
+     */
+    protected function collectNestedUuids(array $data, string $path): array
+    {
+        if (! str_contains($path, '.*.')) {
+            return isset($data[$path]) && is_array($data[$path]) ? $this->collectBlockUuids($data[$path]) : [];
+        }
+
+        [$repeaterKey, $subField] = explode('.*.', $path, 2);
+        $uuids = [];
+
+        foreach ($data[$repeaterKey] ?? [] as $item) {
+            if (is_array($item) && isset($item[$subField]) && is_array($item[$subField])) {
+                $uuids = array_merge($uuids, $this->collectBlockUuids($item[$subField]));
+            }
+        }
+
+        return $uuids;
     }
 
     /**

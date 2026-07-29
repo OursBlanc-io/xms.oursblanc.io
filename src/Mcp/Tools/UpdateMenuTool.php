@@ -14,18 +14,24 @@ class UpdateMenuTool extends AbstractXmsTool
 
     protected string $description = 'Replace the given fields of an existing menu. Only the fields you pass are '.
         'changed. Passing `items` replaces the entire items list (including all children) — there is no partial '.
-        'patch for individual items, so include every item you want to keep.';
+        'patch for individual items, so include every item you want to keep, with all of its fields (label, '.
+        'link_type, url/page_id/target_locale, target, display) — omitting a field on an existing item clears it '.
+        'rather than preserving its previous value.';
 
     protected function itemSchema(JsonSchema $schema, bool $withChildren): array
     {
         $fields = [
             'label' => $schema->string()->required(),
-            'link_type' => $schema->string()->enum(['page', 'url'])->description('Defaults to "url".'),
+            'link_type' => $schema->string()->enum(['page', 'url', 'language_switch'])->description('Defaults to "url".'),
             'url' => $schema->string()->description('Required when link_type is "url".'),
             'page_id' => $schema->integer()->description('Required when link_type is "page".'),
+            'target_locale' => $schema->string()->description('Required when link_type is "language_switch", e.g. "en".'),
+            'target' => $schema->string()->enum(['_self', '_blank'])->description('Defaults to "_self". Not used for language_switch.'),
         ];
 
         if ($withChildren) {
+            $fields['display'] = $schema->string()->enum(['link', 'button_primary', 'button_secondary'])
+                ->description('Defaults to "link". Only meaningful on top-level items.');
             $fields['children'] = $schema->array()->items($schema->object($this->itemSchema($schema, false)));
         }
 

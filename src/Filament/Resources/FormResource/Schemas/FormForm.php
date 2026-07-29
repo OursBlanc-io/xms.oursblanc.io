@@ -73,7 +73,9 @@ class FormForm
                 ])
                 ->columns(2)
                 ->orderColumn('sort_order')
+                ->itemLabel(fn (array $state): ?string => $state['label'] ?? null)
                 ->collapsible()
+                ->collapsed()
                 ->addActionLabel('Add field'),
         ]);
     }

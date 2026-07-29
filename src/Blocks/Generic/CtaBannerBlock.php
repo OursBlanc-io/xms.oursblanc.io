@@ -2,6 +2,7 @@
 
 namespace OursBlanc\Xms\Blocks\Generic;
 
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use OursBlanc\Xms\Blocks\Block;
 
@@ -25,10 +26,8 @@ class CtaBannerBlock extends Block
     public static function fields(): array
     {
         return [
-            TextInput::make('title')
-                ->required(),
-            TextInput::make('subtitle')
-                ->required(),
+            TextInput::make('title'),
+            TextInput::make('subtitle'),
             TextInput::make('cta_label')
                 ->required(),
             TextInput::make('cta_url')
@@ -37,6 +36,14 @@ class CtaBannerBlock extends Block
             TextInput::make('anchor_id')
                 ->label('Anchor ID (optional)')
                 ->helperText("For in-page links, e.g. 'contact'."),
+            Select::make('style')
+                ->options([
+                    'dark' => 'Dark (breathing blue glow)',
+                    'transparent' => 'Transparent (no background)',
+                    'light' => 'Light',
+                ])
+                ->default('dark')
+                ->required(),
         ];
     }
 

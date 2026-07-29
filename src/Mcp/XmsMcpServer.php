@@ -49,9 +49,13 @@ class XmsMcpServer extends Server
         review content before calling publish_page. Every write is recorded as a revision.
 
         Menus are identified by a (location, locale) pair, e.g. "header"/"fr" — a location has one
-        menu per locale. Items are two levels deep: each item has a `label` and links either to an
-        internal page (link_type "page" + page_id) or a raw URL/anchor (link_type "url" + url), and
-        may have one level of `children` for the same shape.
+        menu per locale. Items are two levels deep: each item has a `label` and one of link_type
+        "page" (+ page_id), "url" (+ url, also used for anchors like "#formats"), or
+        "language_switch" (+ target_locale — resolves to the current page's translation in that
+        locale, or its homepage, so prefer it over a hardcoded locale URL). `target` ("_self"/
+        "_blank") controls new-tab opening. Top-level items may set `display` ("link",
+        "button_primary", "button_secondary") to render as a button; children (dropdown entries)
+        are always plain links and don't support `display`. Items may have one level of `children`.
 
         Forms are created with create_form (name + a list of fields) and rendered on a page via the
         `form` block, which references a form by id. Each submission can email a list of addresses

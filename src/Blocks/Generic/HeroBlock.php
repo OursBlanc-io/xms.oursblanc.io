@@ -3,8 +3,10 @@
 namespace OursBlanc\Xms\Blocks\Generic;
 
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Get;
 use OursBlanc\Xms\Blocks\Block;
 use OursBlanc\Xms\Filament\Forms\Components\PageMediaUpload;
 use OursBlanc\Xms\Filament\Forms\Components\PexelsPicker;
@@ -35,6 +37,10 @@ class HeroBlock extends Block
             PageMediaUpload::make('image')
                 ->image()
                 ->hintAction(PexelsPicker::image('image', attributionField: 'attribution', attributionUrlField: 'attribution_url')),
+            Placeholder::make('image_preview')
+                ->hiddenLabel()
+                ->visible(fn (Get $get) => filled($get('image')))
+                ->content(fn (Get $get) => PageMediaUpload::imagePreviewHtml($get('image'))),
             TextInput::make('cta_label'),
             TextInput::make('cta_url')
                 ->regex('/^(#[^\s]*|\/[^\s]*|https?:\/\/[^\s]+)$/'),

@@ -26,30 +26,28 @@ class AuroraHeroBlock extends Block
     public static function fields(): array
     {
         return [
-            TextInput::make('eyebrow')
-                ->required(),
+            TextInput::make('eyebrow'),
             TextInput::make('title_lead')
                 ->label('Title — plain part')
                 ->required(),
             TextInput::make('title_accent')
-                ->label('Title — accent part')
-                ->required(),
+                ->label('Title — accent part'),
             TextInput::make('lede')
-                ->label('Lede paragraph')
-                ->required(),
-            TextInput::make('cta_primary_label')
-                ->required(),
+                ->label('Lede paragraph'),
+            TextInput::make('cta_primary_label'),
             TextInput::make('cta_primary_url')
-                ->regex('/^(#[^\s]*|\/[^\s]*|https?:\/\/[^\s]+)$/')
-                ->required(),
+                ->regex('/^(#[^\s]*|\/[^\s]*|https?:\/\/[^\s]+)$/'),
             TextInput::make('cta_secondary_label'),
             TextInput::make('cta_secondary_url')
                 ->regex('/^(#[^\s]*|\/[^\s]*|https?:\/\/[^\s]+)$/'),
             TextInput::make('trust_label'),
             Repeater::make('trust_logos')
                 ->schema([
-                    TextInput::make('name')->required(),
+                    TextInput::make('name'),
                 ])
+                ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
+                ->collapsible()
+                ->collapsed()
                 ->addActionLabel('Add logo'),
         ];
     }

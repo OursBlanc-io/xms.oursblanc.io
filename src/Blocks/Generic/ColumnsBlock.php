@@ -3,8 +3,10 @@
 namespace OursBlanc\Xms\Blocks\Generic;
 
 use Filament\Forms\Components\MarkdownEditor;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Get;
 use OursBlanc\Xms\Blocks\Block;
 use OursBlanc\Xms\Filament\Forms\Components\PageMediaUpload;
 
@@ -34,7 +36,14 @@ class ColumnsBlock extends Block
                     MarkdownEditor::make('content'),
                     PageMediaUpload::make('image')
                         ->image(),
+                    Placeholder::make('image_preview')
+                        ->hiddenLabel()
+                        ->visible(fn (Get $get) => filled($get('image')))
+                        ->content(fn (Get $get) => PageMediaUpload::imagePreviewHtml($get('image'))),
                 ])
+                ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
+                ->collapsible()
+                ->collapsed()
                 ->minItems(2)
                 ->maxItems(3)
                 ->required(),
