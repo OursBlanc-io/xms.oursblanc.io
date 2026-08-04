@@ -2,6 +2,7 @@
 
 namespace OursBlanc\Xms\Blocks;
 
+use Filament\Forms\Components\Builder;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -96,6 +97,10 @@ class SchemaGenerator
             return ['type' => 'integer', 'x-media' => true];
         }
 
+        if ($field instanceof Builder) {
+            return static::builderProperty();
+        }
+
         if ($field instanceof Repeater) {
             return [
                 'type' => 'array',
@@ -110,6 +115,31 @@ class SchemaGenerator
     }
 
     /**
+     * A Builder field holds a heterogeneous list of *other blocks* (see
+     * Block::nestedBlockFields()) — each item's own `data` shape depends on
+     * its `type`, so unlike a Repeater there's no single fixed sub-schema to
+     * report. This generic uuid/type/data envelope is the honest schema;
+     * callers look up each type's own `data` shape via list_block_types.
+     *
+     * @return array<string, mixed>
+     */
+    protected static function builderProperty(): array
+    {
+        return [
+            'type' => 'array',
+            'items' => [
+                'type' => 'object',
+                'properties' => [
+                    'type' => ['type' => 'string'],
+                    'data' => ['type' => 'object'],
+                    'uuid' => ['type' => 'string'],
+                ],
+                'required' => ['type', 'data'],
+            ],
+        ];
+    }
+
+    /**
      * @param  array<int, string>  $mediaFields
      * @return array<int, string>
      */
@@ -121,7 +151,7 @@ class SchemaGenerator
 
         return match (true) {
             $field instanceof Toggle => ['boolean'],
-            $field instanceof Repeater => ['array'],
+            $field instanceof Repeater, $field instanceof Builder => ['array'],
             default => ['string'],
         };
     }

@@ -3,6 +3,7 @@
 namespace OursBlanc\Xms\Rendering;
 
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Str;
 use OursBlanc\Xms\Blocks\BlockRegistry;
 use OursBlanc\Xms\Models\Page;
 
@@ -46,7 +47,12 @@ class PageRenderer
         $blockClass = $this->registry->find($block['type']);
 
         return [
-            'uuid' => $block['uuid'],
+            // Blocks nested inside another block's Builder field (e.g. a
+            // Tabbed Showcase tab's content) may predate this envelope
+            // requiring `uuid` — fall back to a throwaway one rather than
+            // 500ing; it's only used as a render-time React/Blade key, never
+            // persisted.
+            'uuid' => $block['uuid'] ?? (string) Str::uuid(),
             'type' => $block['type'],
             'view' => $blockClass ? $this->viewResolver->blockView($blockClass) : null,
             'data' => $blockClass ? $blockClass::resolveData($block['data'] ?? [], $page) : ($block['data'] ?? []),
