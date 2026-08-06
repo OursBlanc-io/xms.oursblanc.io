@@ -11,11 +11,11 @@ class PageUrlGenerator
         return url(static::path($page->locale, $page->slug));
     }
 
-    public static function path(string $locale, string $slug): string
+    public static function path(?string $locale, string $slug): string
     {
         $slug = ltrim($slug, '/');
 
-        if (! config('xms.locale_in_url')) {
+        if ($locale === null || ! config('xms.locale_in_url')) {
             return '/'.$slug;
         }
 

@@ -45,3 +45,9 @@ it('ignores locale prefixing entirely when locale_in_url is disabled', function 
 
     expect(PageUrlGenerator::for($page))->toBe(url('/about'));
 });
+
+it('serves locale-agnostic pages (null locale) at the root, without a locale prefix', function () {
+    $page = Page::create(['locale' => null, 'slug' => 'mentions-legales', 'title' => 'X', 'blocks' => [], 'seo' => []]);
+
+    expect(PageUrlGenerator::for($page))->toBe(url('/mentions-legales'));
+});
