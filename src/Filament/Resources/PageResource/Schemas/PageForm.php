@@ -43,7 +43,12 @@ class PageForm
                                     table: 'xms_pages',
                                     column: 'slug',
                                     ignoreRecord: true,
-                                    modifyRuleUsing: fn ($rule, $get) => $rule->where('locale', $get('locale')),
+                                    // A trashed page keeps its row (soft delete), so
+                                    // without this its (locale, slug) would still
+                                    // count as taken and block reusing it.
+                                    modifyRuleUsing: fn ($rule, $get) => $rule
+                                        ->where('locale', $get('locale'))
+                                        ->where('deleted_at', null),
                                 ),
                             static::blocksBuilder(),
                         ]),
@@ -71,7 +76,17 @@ class PageForm
                                 ->default('index,follow'),
                             Textarea::make('seo.structured_data')
                                 ->rows(4)
-                                ->helperText('Raw JSON-LD, optional.'),
+                                ->helperText('Raw JSON-LD, optional.')
+                                // MCP tools accept `seo.structured_data` as a
+                                // JSON object (the natural shape for an AI
+                                // caller to produce), while this field always
+                                // edits/saves it as the raw JSON-LD string the
+                                // front-end <script> tag expects — encode on
+                                // the way in so admin-authored data stays
+                                // consistent with MCP-authored data.
+                                ->afterStateHydrated(fn ($component, $state) => $component->state(
+                                    is_array($state) ? json_encode($state) : $state,
+                                )),
                         ]),
                     Tab::make('Settings')
                         ->schema([
@@ -80,7 +95,7 @@ class PageForm
                                     config('xms.locales'),
                                     config('xms.locales'),
                                 ))
-                                ->required(),
+                                ->helperText('Leave empty for a locale-agnostic page served at the site root (e.g. "/my-page"), outside any /fr or /en prefix.'),
                             TextInput::make('template')
                                 ->helperText('Blade layout override, e.g. "landing". Leave empty to use the theme default.'),
                             Select::make('status')
@@ -130,6 +145,7 @@ class PageForm
         return Builder::make('blocks')
             ->blocks($blocks)
             ->collapsible()
+            ->collapsed()
             ->blockNumbers(false)
             ->addActionLabel('Add block');
     }
