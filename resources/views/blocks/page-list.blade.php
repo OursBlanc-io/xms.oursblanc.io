@@ -26,18 +26,22 @@
             <li class="xms-page-list__item">
                 <a class="xms-page-list__link" href="{{ \OursBlanc\Xms\Support\PageUrlGenerator::for($listedPage) }}">
                     @if ($listedPage->illustrationUrl())
-                        <img class="xms-page-list__illustration" src="{{ $listedPage->illustrationUrl() }}" alt="" loading="lazy">
+                        <span class="xms-page-list__media">
+                            <img class="xms-page-list__illustration" src="{{ $listedPage->illustrationUrl() }}" alt="" loading="lazy">
+                        </span>
                     @endif
-                    <span class="xms-page-list__title">{{ $listedPage->effectiveListTitle() }}</span>
+                    <span class="xms-page-list__body">
+                        @if ($listedPage->published_at)
+                            <time class="xms-page-list__date" datetime="{{ $listedPage->published_at->toAtomString() }}">
+                                {{ $listedPage->published_at->format('Y-m-d') }}
+                            </time>
+                        @endif
+                        <span class="xms-page-list__title">{{ $listedPage->effectiveListTitle() }}</span>
+                        @if ($listedPage->list_excerpt)
+                            <p class="xms-page-list__excerpt">{{ $listedPage->list_excerpt }}</p>
+                        @endif
+                    </span>
                 </a>
-                @if ($listedPage->list_excerpt)
-                    <p class="xms-page-list__excerpt">{{ $listedPage->list_excerpt }}</p>
-                @endif
-                @if ($listedPage->published_at)
-                    <time class="xms-page-list__date" datetime="{{ $listedPage->published_at->toAtomString() }}">
-                        {{ $listedPage->published_at->format('Y-m-d') }}
-                    </time>
-                @endif
             </li>
         @empty
             <li class="xms-page-list__empty">{{ __('No pages found.') }}</li>
