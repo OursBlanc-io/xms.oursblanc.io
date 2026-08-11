@@ -22,6 +22,10 @@
     $alternates = ($page->translationGroup && $page->locale)
         ? $page->translationGroup->pages()->published()->get()->push($page)->unique('locale')->filter(fn ($p) => $p->locale)
         : collect();
+
+    // x-default should resolve to the French version regardless of which
+    // locale is being rendered, since fr is the site's default locale.
+    $xDefaultPage = $page->locale === 'fr' ? $page : $alternates->firstWhere('locale', 'fr');
 @endphp
 
 <title>{{ $title }}</title>
@@ -35,6 +39,9 @@
 @foreach($alternates as $alternate)
     <link rel="alternate" hreflang="{{ $alternate->locale }}" href="{{ PageUrlGenerator::for($alternate) }}">
 @endforeach
+@if($xDefaultPage)
+    <link rel="alternate" hreflang="x-default" href="{{ PageUrlGenerator::for($xDefaultPage) }}">
+@endif
 
 <meta property="og:type" content="website">
 <meta property="og:title" content="{{ $seo['og_title'] ?? $title }}">
@@ -52,7 +59,7 @@
     <meta property="og:image" content="{{ $ogImage }}">
 @endif
 
-<meta name="twitter:card" content="{{ $ogImage ? 'summary_large_image' : 'summary' }}">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ $seo['og_title'] ?? $title }}">
 @if(!empty($seo['og_description']) || !empty($seo['description']))
     <meta name="twitter:description" content="{{ $seo['og_description'] ?? $seo['description'] }}">
@@ -64,9 +71,7 @@
     <meta name="twitter:site" content="{{ config('xms.seo.twitter_handle') }}">
 @endif
 
-@if(!empty($seo['robots']))
-    <meta name="robots" content="{{ $seo['robots'] }}">
-@endif
+<meta name="robots" content="{{ $seo['robots'] ?? 'index,follow' }}">
 
 @if(config('xms.seo.organization_name'))
     <script type="application/ld+json">{!! json_encode(array_filter([

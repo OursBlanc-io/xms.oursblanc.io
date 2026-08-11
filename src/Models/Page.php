@@ -119,7 +119,13 @@ class Page extends Model implements HasMedia
         return $query->where('status', 'published');
     }
 
-    public function scopeLocale(Builder $query, string $locale): Builder
+    /**
+     * `null` matches locale-agnostic pages (a page served at the site root,
+     * outside any /fr or /en prefix) rather than being treated as "no
+     * filter" — callers that want every locale should simply not chain this
+     * scope at all.
+     */
+    public function scopeLocale(Builder $query, ?string $locale): Builder
     {
         return $query->where('locale', $locale);
     }

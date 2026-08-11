@@ -13,6 +13,7 @@ class SitemapController
             ->published()
             ->orderBy('updated_at', 'desc')
             ->get()
+            ->reject(fn (Page $page): bool => str_contains($page->seo['robots'] ?? '', 'noindex'))
             ->groupBy('translation_group_id');
 
         return response()
