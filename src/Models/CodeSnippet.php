@@ -44,9 +44,12 @@ class CodeSnippet extends Model
     }
 
     /**
-     * A null `locale` means the snippet runs on every locale.
+     * A null `locale` on the snippet means it runs on every locale. A null
+     * `$locale` argument means the page itself is locale-agnostic (served at
+     * the site root, outside any /fr or /en prefix) — it only matches those
+     * every-locale snippets, not any locale-specific one.
      */
-    public function scopeForLocale(Builder $query, string $locale): Builder
+    public function scopeForLocale(Builder $query, ?string $locale): Builder
     {
         return $query->where(fn (Builder $q) => $q->whereNull('locale')->orWhere('locale', $locale));
     }
@@ -54,7 +57,7 @@ class CodeSnippet extends Model
     /**
      * @return Collection<int, static>
      */
-    public static function forPlacement(string $placement, string $locale): Collection
+    public static function forPlacement(string $placement, ?string $locale): Collection
     {
         return static::query()
             ->active()
