@@ -17,6 +17,7 @@ class Form extends Model
         'notification_emails',
         'webhook_url',
         'webhook_enabled',
+        'webhook_secret',
     ];
 
     protected $casts = [

@@ -13,6 +13,9 @@ class FormSubmission extends Model
         'form_id',
         'data',
         'ip_address',
+        'visitor_id',
+        'page_url',
+        'user_agent',
     ];
 
     protected $casts = [

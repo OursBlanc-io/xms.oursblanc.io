@@ -3,6 +3,7 @@
 namespace OursBlanc\Xms;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use OursBlanc\Xms\Blocks\Block;
@@ -136,6 +137,16 @@ class XmsServiceProvider extends ServiceProvider
 
             $schedule->command(PruneOrphanedMediaCommand::class)->daily();
         });
+
+        /*
+         * The visitor cookie is written by another application on a sibling
+         * subdomain, so it is not encrypted with this application's key.
+         * Without this exclusion Laravel would silently drop it, and the
+         * capture in FormSubmissionController would always read null.
+         */
+        if ($visitorCookie = config('xms.forms.visitor_cookie')) {
+            EncryptCookies::except($visitorCookie);
+        }
 
         Event::listen([PageSaved::class, PagePublished::class, PageUnpublished::class], DispatchCdnPurge::class);
         Event::listen(FormSubmitted::class, DispatchFormNotifications::class);

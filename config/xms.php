@@ -98,6 +98,22 @@ return [
 
         // Max submissions per minute per IP, across all forms.
         'throttle' => '10,1',
+
+        /*
+         * Name of the first-party visitor cookie, set by the CRM on the
+         * tracking subdomain and therefore readable here: both hosts share
+         * the same registrable domain, so the cookie is sent along with the
+         * form POST.
+         *
+         * It is captured on the submission and forwarded to the webhook, so a
+         * consumer can tie the person filling the form to the pages they read
+         * before doing so. Empty disables the capture entirely.
+         *
+         * The service provider excludes this name from cookie encryption:
+         * Laravel drops any incoming cookie it cannot decrypt, and this one is
+         * written by another application.
+         */
+        'visitor_cookie' => 'ob_vid',
     ],
 
     /*

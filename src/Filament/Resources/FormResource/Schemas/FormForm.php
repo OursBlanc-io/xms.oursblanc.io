@@ -44,6 +44,13 @@ class FormForm
                 ->url()
                 ->visible(fn (Get $get) => $get('webhook_enabled'))
                 ->required(fn (Get $get) => $get('webhook_enabled')),
+            TextInput::make('webhook_secret')
+                ->label('Webhook signing secret')
+                ->password()
+                ->revealable()
+                ->maxLength(255)
+                ->visible(fn (Get $get) => $get('webhook_enabled'))
+                ->helperText('Shared with the receiving application, which uses it to check the X-Xms-Signature header. Leave empty to send unsigned, which only makes sense for a consumer that does not create anything.'),
             Repeater::make('fields')
                 ->relationship()
                 ->schema([
