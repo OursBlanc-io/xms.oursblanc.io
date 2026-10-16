@@ -4,6 +4,7 @@ namespace OursBlanc\Xms\Filament;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use OursBlanc\Xms\Filament\Pages\MediaManager;
 use OursBlanc\Xms\Filament\Resources\ApiTokenResource;
 use OursBlanc\Xms\Filament\Resources\CategoryResource;
 use OursBlanc\Xms\Filament\Resources\CodeSnippetResource;
@@ -36,6 +37,10 @@ class XmsPlugin implements Plugin
             FormResource::class,
             FormSubmissionResource::class,
             ApiTokenResource::class,
+        ]);
+
+        $panel->pages([
+            MediaManager::class,
         ]);
     }
 
